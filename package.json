@@ -1,0 +1,37 @@
+{
+  "name": "dsh-shortcut-extensions",
+  "version": "3.4.1",
+  "private": true,
+  "type": "module",
+  "description": "Shortcut Extensions: a toggleable registry of quick-switch shortcut commands (model palette with pins, session palette with prompt preview and archived restore, recency-ordered session cycling, find-next-answered jump, focus composer, configurable permission cycling) with a sidebar control panel and a custom command editor.",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-sidebar",
+        "@deepseek-ai/dsh-client-shortcuts",
+        "@deepseek-ai/dsh-client-ui-model-selection",
+        "@deepseek-ai/dsh-client-ui-workspace",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ]
+    }
+  }
+}

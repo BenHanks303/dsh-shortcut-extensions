@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Shortcut Extensions",
+    "description": "A manageable deck of quick-switch shortcut commands: model palette with pins (Cmd+Shift+P), session list including archived with restore (Cmd+G), next/previous session (Ctrl+Tab / Ctrl+Shift+Tab), jump to a session that just answered (Cmd+J), focus the chat input (Cmd+I), and one-key permission toggling (Cmd+L). The sidebar panel lists every command with its live keys and an individual on/off switch."
+  }
+}
