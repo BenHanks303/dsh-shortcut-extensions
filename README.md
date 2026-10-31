@@ -1,5 +1,9 @@
 # dsh-shortcut-extensions · 快捷键拓展
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/tag/BenHanks303/dsh-shortcut-extensions?label=release&color=3559e0)](https://github.com/BenHanks303/dsh-shortcut-extensions/releases)
+[![Platform](https://img.shields.io/badge/platform-DSH_Desktop_%7C_Web-3559e0)](https://github.com/deepseek-ai/deepseek-harness)
+
 A [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) plugin that adds a keyboard-driven quick-switching layer to the DSH web/desktop UI: a model palette, a session palette with prompt preview, session cycling, find-next-answered, composer focus, and configurable permission cycling — all manageable from a sidebar control panel.
 
 中文说明见 [README.zh.md](README.zh.md)。

@@ -1,5 +1,9 @@
 # dsh-shortcut-extensions · 快捷键拓展
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/tag/BenHanks303/dsh-shortcut-extensions?label=release&color=3559e0)](https://github.com/BenHanks303/dsh-shortcut-extensions/releases)
+[![Platform](https://img.shields.io/badge/platform-DSH_桌面_%7C_网页-3559e0)](https://github.com/deepseek-ai/deepseek-harness)
+
 一个 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件，为 DSH 网页/桌面界面增加一层**键盘驱动的快速切换**：模型面板、带提问预览的会话面板、会话循环、查找下一个已回答会话、聚焦输入框、可配置的权限循环——全部可以在侧栏控制面板里管理。
 
 English documentation: [README.md](README.md)。
