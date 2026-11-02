@@ -561,10 +561,12 @@ window.__ModuleLoader__.load({
       '.dqs-pinBtn[data-pinned="true"]{color:var(--dsw-alias-brand-primary);}',
       '.dqs-status{padding:10px 16px;font-size:12px;color:var(--dsw-alias-label-secondary);}',
       '.dqs-statusError{color:var(--dsw-alias-state-error-primary);}',
-      '.dqs-footer{padding:8px 16px;font-size:11px;color:var(--dsw-alias-label-secondary);',
-      'border-top:.5px solid var(--dsw-alias-border-l1);display:flex;gap:14px;flex-wrap:wrap;}',
+      '.dqs-footer{padding:9px 16px;font-size:11px;color:var(--dsw-alias-label-secondary);',
+      'border-top:.5px solid var(--dsw-alias-border-l1);display:flex;align-items:center;gap:6px 18px;flex-wrap:wrap;}',
+      '.dqs-hintItem{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}',
       '.dqs-kbd{border:none;background:var(--dsw-alias-bg-layer-2);border-radius:4px;',
-      'padding:1px 5px;font-size:10px;margin-right:4px;color:var(--dsw-alias-label-secondary);}',
+      'padding:1px 6px;min-width:18px;box-sizing:border-box;text-align:center;font-size:10px;',
+      'color:var(--dsw-alias-label-secondary);display:inline-flex;align-items:center;justify-content:center;}',
       '.dqs-rowDot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-idle-primary);opacity:.45;}',
       '.dqs-rowDot[data-running="true"]{background:var(--dsw-alias-state-success-primary);opacity:1;}',
       '.dqs-rowPin{flex:none;color:var(--dsw-alias-brand-primary);display:flex;}',
@@ -1407,11 +1409,11 @@ window.__ModuleLoader__.load({
             ? h('div', { className: 'dqs-status' }, t('palette.providerFailures'))
             : null,
           h('div', { className: 'dqs-footer' },
-            h('span', null, h('span', { className: 'dqs-kbd' }, '\u2191\u2193'), t('palette.hint.nav')),
-            h('span', null, h('span', { className: 'dqs-kbd' }, 'Enter'), t('palette.hint.confirm')),
-            h('span', null, h('span', { className: 'dqs-kbd' }, 'Esc'), t('palette.hint.close')),
-            h('span', null, h('span', { className: 'dqs-kbd' }, '\u2605'), t('palette.hint.pin')),
-            h('span', null, t('palette.hint.tag')))
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, '\u2191\u2193'), t('palette.hint.nav')),
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, 'Enter'), t('palette.hint.confirm')),
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, 'Esc'), t('palette.hint.close')),
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, '\u2605'), t('palette.hint.pin')),
+            h('span', { className: 'dqs-hintItem' }, t('palette.hint.tag')))
         ));
     }
 
@@ -1618,9 +1620,9 @@ window.__ModuleLoader__.load({
                         })))),
           error ? h('div', { className: 'dqs-status dqs-statusError' }, error) : null,
           h('div', { className: 'dqs-footer' },
-            h('span', null, h('span', { className: 'dqs-kbd' }, '\u2191\u2193'), t('session.hint.nav')),
-            h('span', null, h('span', { className: 'dqs-kbd' }, 'Enter'), t('session.hint.open')),
-            h('span', null, h('span', { className: 'dqs-kbd' }, 'Esc'), t('session.hint.close')))));
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, '\u2191\u2193'), t('session.hint.nav')),
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, 'Enter'), t('session.hint.open')),
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, 'Esc'), t('session.hint.close')))));
     }
 
     /* ------------------------------------------------------------------ */
