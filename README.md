@@ -7,6 +7,7 @@
 A [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) plugin that adds a keyboard-driven quick-switching layer to the DSH web/desktop UI: a model palette, a session palette with prompt preview, session cycling, find-next-answered, composer focus, and configurable permission cycling — all manageable from a sidebar control panel.
 
 中文说明见 [README.zh.md](README.zh.md)。
+- **Header chips** — the current workspace name and git branch sit right beside the session title (`conversation.session.header.actions`); the branch is re-read whenever you enter a session.
 
 ## Features
 

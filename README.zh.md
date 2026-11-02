@@ -7,6 +7,7 @@
 一个 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件，为 DSH 网页/桌面界面增加一层**键盘驱动的快速切换**：模型面板、带提问预览的会话面板、会话循环、查找下一个已回答会话、聚焦输入框、可配置的权限循环——全部可以在侧栏控制面板里管理。
 
 English documentation: [README.md](README.md)。
+- **页头标签** — 在会话标题右侧显示当前工作区名与 git 分支（`conversation.session.header.actions`），每次进入会话都会重新读取分支。
 
 ## 功能
 

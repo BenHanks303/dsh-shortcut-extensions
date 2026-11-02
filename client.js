@@ -579,6 +579,13 @@ window.__ModuleLoader__.load({
       '.dqs-rowDot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-idle-primary);opacity:.45;}',
       '.dqs-rowDot[data-running="true"]{background:var(--dsw-alias-state-success-primary);opacity:1;}',
       '.dqs-rowPin{flex:none;color:var(--dsw-alias-brand-primary);display:flex;}',
+      '.dqs-hdrChip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;',
+      'border-radius:5px;font-size:11px;line-height:1;color:var(--dsw-alias-label-secondary);',
+      'background:var(--dsw-alias-bg-layer-2);border:.5px solid var(--dsw-alias-border-l1);',
+      'max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:6px;}',
+      '.dqs-hdrChip:last-child{margin-right:0;}',
+      '.dqs-hdrChipLabel{overflow:hidden;text-overflow:ellipsis;}',
+      '.dqs-hdrChipIcon{display:flex;flex:none;}',
       '.dqs-badge{flex:none;font-size:11px;color:var(--dsw-alias-state-warn-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:999px;padding:0 8px;line-height:16px;}',
       /* Panel (mirrors the host Plugins page: centered 960px column) */
       '.dqs-page{box-sizing:border-box;height:100%;color:var(--dsw-alias-label-primary);display:flex;',
@@ -1689,6 +1696,109 @@ window.__ModuleLoader__.load({
     }
 
     /* ------------------------------------------------------------------ */
+    /* Conversation header chips: workspace name and git branch            */
+    /* ------------------------------------------------------------------ */
+
+    const FOLDER_GLYPH = '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />';
+    const BRANCH_GLYPH = '<line x1="6" x2="6" y1="3" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" />';
+
+    function basenameOf(path) {
+      return String(path ?? '').split('/').filter(Boolean).pop() ?? '';
+    }
+
+    function workspaceOfSession(workspacesSnap, sessionId) {
+      for (const item of workspacesSnap?.items ?? []) {
+        if ((item?.sessionIds ?? []).includes(sessionId)) {
+          return { title: item.title || basenameOf(item.path), path: item.path };
+        }
+      }
+      return undefined;
+    }
+
+    function HeaderGlyph({ markup }) {
+      return h('svg', {
+        width: 12, height: 12, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+        strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
+        style: { display: 'block' },
+        dangerouslySetInnerHTML: { __html: markup }
+      });
+    }
+
+    function HeaderWorkspaceChip({ ctx }) {
+      const sessionId = useSessionId(ctx);
+      const workspacesSnap = useWorkspacesList(ctx);
+      const sessionsSnap = useSessionsList(ctx);
+      let workspace = sessionId === undefined ? undefined : workspaceOfSession(workspacesSnap, sessionId);
+      if (!workspace && sessionId !== undefined) {
+        const cwd = sessionsSnap?.byId?.[sessionId]?.cwd;
+        const name = basenameOf(cwd);
+        if (name !== '') workspace = { title: name, path: cwd };
+      }
+      if (!workspace) return null;
+      return h('span', { className: 'dqs-hdrChip', title: workspace.path ?? workspace.title },
+        h('span', { className: 'dqs-hdrChipIcon' }, h(HeaderGlyph, { markup: FOLDER_GLYPH })),
+        h('span', { className: 'dqs-hdrChipLabel' }, workspace.title));
+    }
+
+    /** sessionId -> branch name (or null when unavailable). */
+    const branchCache = new Map();
+
+    async function readGitBranch(ctx, sessionId) {
+      try {
+        const response = await ctx.remote.workspaceFiles.read(
+          sessionId, '.git/HEAD', { offset: 1 }, new AbortController().signal
+        );
+        // Remote calls resolve to a { ok, value } result envelope.
+        if (response && response.ok === false) {
+          const detail = response.error ?? {};
+          return { branch: null, error: `${detail.code ?? 'failed'} ${detail.message ?? ''}`.trim() };
+        }
+        const payload = response?.value ?? response;
+        const text = String(payload?.text ?? '');
+        const ref = /ref:\s*refs\/heads\/(.+)/u.exec(text);
+        if (ref) return { branch: ref[1].trim(), error: null };
+        const trimmed = text.trim();
+        if (trimmed === '') return { branch: null, error: 'empty .git/HEAD' };
+        return { branch: trimmed.slice(0, 7), error: null };
+      } catch (error) {
+        return { branch: null, error: String(error?.message ?? error) };
+      }
+    }
+
+    const branchErrors = new Map();
+
+    function HeaderBranchChip({ ctx }) {
+      const sessionId = useSessionId(ctx);
+      const [state, setState] = useState({ branch: null, error: null });
+      useEffect(() => {
+        if (sessionId === undefined) { setState({ branch: null, error: null }); return undefined; }
+        // Show the cached value immediately, then re-read so a branch switch
+        // made between visits is picked up.
+        if (branchCache.has(sessionId)) {
+          setState({ branch: branchCache.get(sessionId), error: branchErrors.get(sessionId) ?? null });
+        } else {
+          setState({ branch: null, error: null });
+        }
+        let cancelled = false;
+        readGitBranch(ctx, sessionId).then((value) => {
+          if (cancelled) return;
+          branchCache.set(sessionId, value.branch);
+          if (value.error) branchErrors.set(sessionId, value.error);
+          else branchErrors.delete(sessionId);
+          setState(value);
+        });
+        return () => { cancelled = true; };
+      }, [ctx, sessionId]);
+      if (state.branch) {
+        return h('span', { className: 'dqs-hdrChip', title: `git: ${state.branch}` },
+          h('span', { className: 'dqs-hdrChipIcon' }, h(HeaderGlyph, { markup: BRANCH_GLYPH })),
+          h('span', { className: 'dqs-hdrChipLabel' }, state.branch));
+      }
+      // Not a git repository, unreadable, or still loading: stay silent.
+      return null;
+    }
+
+    /* ------------------------------------------------------------------ */
     /* Sidebar panel: command deck                                         */
     /* ------------------------------------------------------------------ */
 
@@ -2289,6 +2399,7 @@ window.__ModuleLoader__.load({
         'shortcuts',
         'remote',
         'remote.permissionPresets',
+        'remote.workspaceFiles',
         'modelDirectories'
       ],
       apply(ctx) {
@@ -2315,6 +2426,18 @@ window.__ModuleLoader__.load({
           if (!existing) document.head.appendChild(style);
           return () => { if (style.isConnected) style.remove(); };
         }, 'shortcut-ext: styles');
+
+        ctx.slots.inject('conversation.session.header.actions', () => ctx.slots.register({
+          name: 'conversation.session.header.actions',
+          id: 'shortcut-ext.header-workspace',
+          order: 10
+        }, () => h(HeaderWorkspaceChip, { ctx })));
+
+        ctx.slots.inject('conversation.session.header.actions', () => ctx.slots.register({
+          name: 'conversation.session.header.actions',
+          id: 'shortcut-ext.header-branch',
+          order: 11
+        }, () => h(HeaderBranchChip, { ctx })));
 
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({
           name: 'shell.overlay',
