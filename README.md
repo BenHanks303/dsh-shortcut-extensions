@@ -62,6 +62,10 @@ dsh-shortcut-extensions/
 └── icon.svg
 ```
 
+## Icons / 图标
+
+- Icons: [Lucide](https://lucide.dev) — `keyboard`, `cpu`, `messages-square`, `arrow-left`, `arrow-right`, `search-check`, `text-cursor-input`, `shield`, `shield-half`, `panel-left`, `message-circle`, `layout-grid`, `message-square-plus` (ISC License).
+
 ## License
 
 [MIT](LICENSE)

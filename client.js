@@ -375,8 +375,8 @@ window.__ModuleLoader__.load({
         labelKey: 'action.newSession',
         impl: 'uiWorkspace.startSession()',
         run: (d) => { try { d.ctx.uiWorkspace.startSession(); } catch (error) { console.error('[shortcut-ext] startSession failed', error); } }
-      }
-    ];
+      },
+   ];
 
     const ACTION_BY_ID = new Map(ACTIONS.map((action) => [action.id, action]));
 
@@ -497,7 +497,7 @@ window.__ModuleLoader__.load({
           },
           {}
         ]
-      }
+      },
     ];
 
     const COMMAND_IDS = COMMANDS.map((command) => command.id);
@@ -507,12 +507,13 @@ window.__ModuleLoader__.load({
     /* ------------------------------------------------------------------ */
 
     const CSS = [
-      /* Palettes: same material as the host's native popup (menu surface, centered) */
+      /* Palettes: menu-toned surface over an opaque base (no see-through) */
       '.dqs-backdrop{position:fixed;inset:0;z-index:1200;display:flex;align-items:center;justify-content:center;',
       'background:rgba(0,0,0,.32);}',
       '.dqs-palette{width:min(720px,calc(100vw - 48px));max-height:min(70vh,660px);display:flex;flex-direction:column;',
-      'overflow:hidden;background:var(--dsw-specific-menu,var(--dsw-alias-bg-overlay,var(--dsw-alias-bg-layer-1)));',
-      'backdrop-filter:var(--dsw-menu-backdrop-filter,blur(20px));-webkit-backdrop-filter:var(--dsw-menu-backdrop-filter,blur(20px));',
+      'overflow:hidden;background-color:var(--dsw-alias-bg-layer-1,var(--dsw-alias-bg-overlay));',
+      'background-image:linear-gradient(var(--dsw-specific-menu,var(--dsw-alias-bg-overlay)),',
+      'var(--dsw-specific-menu,var(--dsw-alias-bg-overlay)));',
       'border:.5px solid var(--dsw-alias-border-l1);border-radius:var(--dsw-radius-lg,14px);',
       'box-shadow:var(--dsw-elevation-prominent,0 12px 32px rgba(0,0,0,.28));color:var(--dsw-alias-label-primary);}',
       '.dqs-paletteHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px 10px;}',
@@ -522,18 +523,25 @@ window.__ModuleLoader__.load({
       '.dqs-closeBtn:hover{background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-2));',
       'color:var(--dsw-alias-label-primary);}',
       '.dqs-input{width:100%;box-sizing:border-box;height:40px;padding:0 12px 0 34px;',
-      'border:none;border-radius:10px;background:var(--dsw-alias-bg-layer-2);',
-      'color:var(--dsw-alias-label-primary);font-size:13px;outline:none;}',
+      'border:1px solid var(--dsw-alias-border-l1);border-radius:8px;background:var(--dsw-alias-bg-layer-2);',
+      'color:var(--dsw-alias-label-primary);font-size:13px;outline:none;transition:border-color .12s;}',
       '.dqs-input::placeholder{color:var(--dsw-alias-label-secondary);opacity:.8;}',
-      '.dqs-input:focus{box-shadow:0 0 0 2px var(--dsw-focus-ring-color,var(--dsw-alias-brand-primary));}',
+      '.dqs-input:hover:not(:focus){border-color:var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));}',
+      '.dqs-input:focus{border-color:var(--dsw-alias-state-business-primary);}',
       '.dqs-searchWrap{position:relative;margin:0 14px 10px;}',
       '.dqs-searchIcon{position:absolute;left:11px;top:50%;transform:translateY(-50%);',
       'color:var(--dsw-alias-label-secondary);display:flex;pointer-events:none;}',
-      '.dqs-list{height:340px;overflow-y:auto;padding:2px 8px 8px;}',
-      '.dqs-columns{display:flex;height:340px;min-height:0;}',
-      '.dqs-columns .dqs-list{flex:1 1 auto;height:100%;min-width:0;}',
+      '.dqs-list{height:360px;overflow-y:auto;padding:2px 8px 6px;}',
+      '.dqs-list::-webkit-scrollbar{width:8px;height:8px;}',
+      '.dqs-list::-webkit-scrollbar-track{background:transparent;}',
+      '.dqs-list::-webkit-scrollbar-thumb{background:var(--dsw-alias-scrollbar-bg-l2,var(--dsw-alias-border-l2));',
+      'border-radius:999px;}',
+      '.dqs-list::-webkit-scrollbar-thumb:hover{background:var(--dsw-alias-scrollbar-hover-l2,var(--dsw-alias-border-l1));}',
+      '.dqs-columns{display:flex;height:360px;min-height:0;}',
+      '.dqs-columns .dqs-list{flex:1 1 auto;height:100%;min-width:0;border-right:none;}',
       '.dqs-paletteWide{width:min(880px,calc(100vw - 48px));}',
-      '.dqs-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14px;}',
+      '.dqs-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;',
+      'font-size:14px;min-height:36px;box-sizing:border-box;}',
       '.dqs-row[data-active="true"]{background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-2));}',
       '.dqs-rowName{flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
       '.dqs-rowProvider{flex:1 1 auto;min-width:0;color:var(--dsw-alias-label-secondary);font-size:12px;',
@@ -561,11 +569,12 @@ window.__ModuleLoader__.load({
       '.dqs-pinBtn[data-pinned="true"]{color:var(--dsw-alias-brand-primary);}',
       '.dqs-status{padding:10px 16px;font-size:12px;color:var(--dsw-alias-label-secondary);}',
       '.dqs-statusError{color:var(--dsw-alias-state-error-primary);}',
-      '.dqs-footer{padding:9px 16px;font-size:11px;color:var(--dsw-alias-label-secondary);',
-      'border-top:.5px solid var(--dsw-alias-border-l1);display:flex;align-items:center;gap:6px 18px;flex-wrap:wrap;}',
-      '.dqs-hintItem{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;}',
-      '.dqs-kbd{border:none;background:var(--dsw-alias-bg-layer-2);border-radius:4px;',
-      'padding:1px 6px;min-width:18px;box-sizing:border-box;text-align:center;font-size:10px;',
+      '.dqs-footer{padding:12px 18px 13px;font-size:12px;color:var(--dsw-alias-label-secondary);',
+      'border-top:.5px solid var(--dsw-alias-border-l1);display:flex;align-items:center;gap:8px 22px;flex-wrap:wrap;}',
+      '.dqs-hintItem{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;}',
+      '.dqs-kbd{border:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));',
+      'background:var(--dsw-alias-bg-layer-1);border-radius:5px;',
+      'min-width:22px;height:20px;padding:0 7px;box-sizing:border-box;text-align:center;font-size:11px;',
       'color:var(--dsw-alias-label-secondary);display:inline-flex;align-items:center;justify-content:center;}',
       '.dqs-rowDot{flex:none;width:8px;height:8px;border-radius:50%;background:var(--dsw-alias-state-idle-primary);opacity:.45;}',
       '.dqs-rowDot[data-running="true"]{background:var(--dsw-alias-state-success-primary);opacity:1;}',
@@ -576,7 +585,7 @@ window.__ModuleLoader__.load({
       'flex-direction:column;align-items:center;gap:26px;padding:0 clamp(24px,4vw,48px) 48px;overflow:auto;}',
       '.dqs-page>*{width:100%;max-width:960px;}',
       '.dqs-pageHead{padding-top:36px;margin-bottom:-6px;}',
-      '.dqs-pageTitle{font-size:26px;font-weight:600;margin:0 0 6px;}',
+      '.dqs-pageTitle{font-size:20px;font-weight:500;line-height:28px;margin:0 0 6px;}',
       '.dqs-pageSub{font-size:13px;color:var(--dsw-alias-label-secondary);margin:0;}',
       '.dqs-toolbar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}',
       '.dqs-tabs{display:flex;gap:2px;padding:3px;border-radius:9px;background:var(--dsw-alias-bg-layer-2);}',
@@ -591,9 +600,10 @@ window.__ModuleLoader__.load({
       '.dqs-linkBtn:hover{text-decoration:underline;}',
       '.dqs-search{width:220px;height:32px;padding:0 12px;box-sizing:border-box;border-radius:8px;',
       'border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-2);',
-      'color:var(--dsw-alias-label-primary);font-size:13px;outline:none;}',
+      'color:var(--dsw-alias-label-primary);font-size:13px;outline:none;transition:border-color .12s;}',
       '.dqs-search::placeholder{color:var(--dsw-alias-label-secondary);opacity:.7;}',
-      '.dqs-search:focus{border-color:var(--dsw-alias-brand-primary);}',
+      '.dqs-search:hover:not(:focus){border-color:var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));}',
+      '.dqs-search:focus{border-color:var(--dsw-alias-state-business-primary);}',
       '.dqs-rows{display:flex;flex-direction:column;}',
       '.dqs-cmdRow{display:flex;align-items:center;gap:16px;padding:14px 2px;',
       'border-bottom:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));transition:opacity .15s;}',
@@ -601,13 +611,13 @@ window.__ModuleLoader__.load({
       '.dqs-tile{flex:none;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;',
       'background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary);border:1px solid var(--dsw-alias-border-l1);}',
       '.dqs-cmdInfo{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:3px;}',
-      '.dqs-cmdName{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
-      '.dqs-cmdImpl{font-size:11.5px;color:var(--dsw-alias-label-secondary);',
+      '.dqs-cmdName{font-size:14px;font-weight:400;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.dqs-cmdImpl{font-size:11px;color:var(--dsw-alias-label-secondary);',
       'font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
       '.dqs-cmdRight{flex:none;display:flex;align-items:center;gap:14px;}',
       '.dqs-cmdKeys{display:flex;align-items:center;gap:3px;}',
       '.dqs-keycap{min-width:20px;height:20px;padding:0 5px;box-sizing:border-box;display:inline-flex;align-items:center;',
-      'justify-content:center;border:1px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));border-radius:5px;',
+      'justify-content:center;border:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));border-radius:5px;',
       'font-size:11px;line-height:1;color:var(--dsw-alias-label-secondary);',
       'background:var(--dsw-alias-bg-layer-2);white-space:nowrap;}',
       '.dqs-keycapNone{border:none;background:none;font-size:11px;color:var(--dsw-alias-label-secondary);opacity:.7;}',
@@ -666,7 +676,7 @@ window.__ModuleLoader__.load({
       '.dqs-permCard{border:1px solid var(--dsw-alias-border-l1);border-radius:12px;',
       'background:var(--dsw-alias-bg-layer-1);padding:16px 18px;}',
       '.dqs-sectionHead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px;}',
-      '.dqs-sectionTitle{font-size:13px;font-weight:600;}',
+      '.dqs-sectionTitle{font-size:14px;font-weight:500;line-height:20px;}',
       '.dqs-chips{display:flex;gap:8px;flex-wrap:wrap;}',
       '.dqs-permChip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));',
       'border-radius:999px;padding:5px 14px;font-size:12px;cursor:pointer;background:transparent;color:var(--dsw-alias-label-secondary);}',
@@ -681,7 +691,17 @@ window.__ModuleLoader__.load({
       '.dqs-expand{padding:2px 2px 18px 64px;}',
       '.dqs-sysRow{display:flex;align-items:center;gap:12px;padding:12px 2px;',
       'border-bottom:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));}',
-      '.dqs-sysLabel{flex:1 1 auto;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.dqs-sysLabel{flex:1 1 auto;min-width:0;font-size:14px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.dqs-tip{position:relative;}',
+      '.dqs-tip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;',
+      'transform:translateX(-50%);background:var(--dsw-alias-bg-overlay,var(--dsw-alias-bg-layer-1));',
+      'border:.5px solid var(--dsw-alias-border-l1);border-radius:6px;padding:3px 8px;font-size:11px;',
+      'line-height:16px;color:var(--dsw-alias-label-primary);white-space:nowrap;z-index:20;',
+      'box-shadow:var(--dsw-elevation-prominent,0 6px 16px rgba(0,0,0,.18));pointer-events:none;}',
+      '.dqs-iconBtn{flex:none;border:none;background:none;cursor:pointer;display:flex;padding:4px;',
+      'border-radius:6px;color:var(--dsw-alias-label-secondary);}',
+      '.dqs-iconBtn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-2));}',
+      '.dqs-iconBtn[data-hidden="true"]{visibility:hidden;pointer-events:none;}',
       '.dqs-sysFixed{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary);',
       'border:1px solid var(--dsw-alias-border-l1);border-radius:999px;padding:1px 8px;}'
     ].join('');
@@ -1218,16 +1238,44 @@ window.__ModuleLoader__.load({
       }));
     }
 
+
+    /** Sidebar glyph: Lucide `keyboard` (ISC) - https://lucide.dev/icons/keyboard */
     function PanelIcon({ size, active }) {
       const px = size ?? 16;
-      const bar = (y, width) => h('rect', { x: 2, y, width, height: 2.4, rx: 1.2, fill: 'currentColor' });
+      const dot = (d) => h('path', { key: d, d });
       return h('svg', {
-        width: px, height: px, viewBox: '0 0 16 16', 'aria-hidden': true,
-        style: { display: 'block', color: active ? 'var(--dsw-alias-brand-primary)' : undefined }
+        width: px,
+        height: px,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 2,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        'aria-hidden': true,
+        style: { display: 'block', color: active ? 'var(--dsw-alias-state-business-primary)' : undefined }
       },
-        bar(2.6, 12),
-        bar(6.8, 8),
-        bar(11, 10));
+        h('rect', { key: 'frame', x: 2, y: 4, width: 20, height: 16, rx: 2 }),
+        dot('M6 8h.01'),
+        dot('M10 8h.01'),
+        dot('M14 8h.01'),
+        dot('M18 8h.01'),
+        dot('M8 12h.01'),
+        dot('M12 12h.01'),
+        dot('M16 12h.01'),
+        dot('M7 16h10'));
+    }
+
+
+    /** Lucide `rotate-ccw` (ISC) - restore a command's default binding. */
+    function ResetIcon() {
+      return h('svg', {
+        width: 14, height: 14, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+        strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
+        style: { display: 'block' }
+      },
+        h('path', { d: 'M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8' }),
+        h('path', { d: 'M3 3v5h5' }));
     }
 
     /* ------------------------------------------------------------------ */
@@ -1650,63 +1698,40 @@ window.__ModuleLoader__.load({
         row.keys.map((cap, index) => h('span', { key: index, className: 'dqs-keycap' }, cap)));
     }
 
+    /**
+     * Command tile glyphs: Lucide icons (ISC, https://lucide.dev) rendered as
+     * static trusted markup, stroked with the current text color.
+     */
+    const COMMAND_GLYPHS = {
+      'open-model-palette': '<rect width="16" height="16" x="4" y="4" rx="2" /> <rect width="6" height="6" x="9" y="9" rx="1" /> <path d="M15 2v2" /> <path d="M15 20v2" /> <path d="M2 15h2" /> <path d="M2 9h2" /> <path d="M20 15h2" /> <path d="M20 9h2" /> <path d="M9 2v2" /> <path d="M9 20v2" />',
+      'open-session-palette': '<path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z" /> <path d="M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1" />',
+      'next-session': '<path d="M5 12h14" /> <path d="m12 5 7 7-7 7" />',
+      'prev-session': '<path d="m12 19-7-7 7-7" /> <path d="M19 12H5" />',
+      'jump-completed': '<path d="m8 11 2 2 4-4" /> <circle cx="11" cy="11" r="8" /> <path d="m21 21-4.3-4.3" />',
+      'focus-composer': '<path d="M5 4h1a3 3 0 0 1 3 3 3 3 0 0 1 3-3h1" /> <path d="M13 20h-1a3 3 0 0 1-3-3 3 3 0 0 1-3 3H5" /> <path d="M5 16H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h1" /> <path d="M13 8h7a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-7" /> <path d="M9 7v10" />',
+      'toggle-permission': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />',
+      'set-permission': '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" /> <path d="M12 22V2" />',
+      'toggle-sidebar': '<rect width="18" height="18" x="3" y="3" rx="2" /> <path d="M9 3v18" />',
+      'show-conversation': '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />',
+      'show-deck': '<rect width="7" height="7" x="3" y="3" rx="1" /> <rect width="7" height="7" x="14" y="3" rx="1" /> <rect width="7" height="7" x="14" y="14" rx="1" /> <rect width="7" height="7" x="3" y="14" rx="1" />',
+      'new-session': '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /> <path d="M12 7v6" /> <path d="M9 10h6" />'
+    };
+
     function CommandGlyph({ id }) {
-      const common = {
-        width: 20, height: 20, viewBox: '0 0 16 16', 'aria-hidden': true, style: { display: 'block' }
-      };
-      switch (id) {
-        case 'open-model-palette':
-          return h('svg', common, h('path', {
-            d: 'M9.2 1.5 4 9.2h3L6.2 14.5 12 6.6H8.7l.5-5.1z', fill: 'currentColor'
-          }));
-        case 'open-session-palette':
-          return h('svg', common, h('path', {
-            d: 'M2.5 4h11M2.5 8h7M2.5 12h9', stroke: 'currentColor', strokeWidth: 1.6,
-            strokeLinecap: 'round', fill: 'none'
-          }));
-        case 'next-session':
-          return h('svg', common, h('path', {
-            d: 'M3 8h9M8.5 4 12.5 8l-4 4', stroke: 'currentColor', strokeWidth: 1.6,
-            strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none'
-          }));
-        case 'prev-session':
-          return h('svg', common, h('path', {
-            d: 'M13 8H4M7.5 4 3.5 8l4 4', stroke: 'currentColor', strokeWidth: 1.6,
-            strokeLinecap: 'round', strokeLinejoin: 'round', fill: 'none'
-          }));
-        case 'jump-completed':
-          return h('svg', common,
-            h('circle', { cx: 8, cy: 8, r: 5.2, fill: 'none', stroke: 'currentColor', strokeWidth: 1.5 }),
-            h('circle', { cx: 8, cy: 8, r: 1.8, fill: 'currentColor' }));
-        case 'focus-composer':
-          return h('svg', common, h('path', {
-            d: 'M5 2.5h6M8 2.5v11M5 13.5h6', stroke: 'currentColor', strokeWidth: 1.6,
-            strokeLinecap: 'round', fill: 'none'
-          }));
-        case 'toggle-sidebar':
-          return h('svg', common,
-            h('rect', { x: 2, y: 2.5, width: 12, height: 11, rx: 2, fill: 'none', stroke: 'currentColor', strokeWidth: 1.4 }),
-            h('path', { d: 'M6 2.5v11', stroke: 'currentColor', strokeWidth: 1.4 }));
-        case 'show-conversation':
-          return h('svg', common, h('path', {
-            d: 'M2.5 3.5h11v7h-6l-3 2.5v-2.5h-2z', fill: 'none', stroke: 'currentColor',
-            strokeWidth: 1.4, strokeLinejoin: 'round'
-          }));
-        case 'show-deck':
-          return h('svg', common, h('path', {
-            d: 'M2.5 4h11M2.5 8h11M2.5 12h11', stroke: 'currentColor', strokeWidth: 1.6,
-            strokeLinecap: 'round', fill: 'none'
-          }));
-        case 'new-session':
-          return h('svg', common, h('path', {
-            d: 'M8 3v10M3 8h10', stroke: 'currentColor', strokeWidth: 1.7, strokeLinecap: 'round', fill: 'none'
-          }));
-        default:
-          return h('svg', common, h('path', {
-            d: 'M8 1.6 12.6 3.4v4.2c0 3.2-2.2 5.2-4.6 6.8-2.4-1.6-4.6-3.6-4.6-6.8V3.4z',
-            fill: 'none', stroke: 'currentColor', strokeWidth: 1.5, strokeLinejoin: 'round'
-          }));
-      }
+      const markup = COMMAND_GLYPHS[id] ?? COMMAND_GLYPHS['toggle-permission'];
+      return h('svg', {
+        width: 20,
+        height: 20,
+        viewBox: '0 0 24 24',
+        fill: 'none',
+        stroke: 'currentColor',
+        strokeWidth: 2,
+        strokeLinecap: 'round',
+        strokeLinejoin: 'round',
+        'aria-hidden': true,
+        style: { display: 'block' },
+        dangerouslySetInnerHTML: { __html: markup }
+      });
     }
 
     function SearchIcon() {
@@ -1919,6 +1944,16 @@ window.__ModuleLoader__.load({
           sysRows.map((row) => {
             return h('div', { key: row.id, className: 'dqs-sysRow' },
               h('span', { className: 'dqs-sysLabel' }, row.label),
+              h('button', {
+                type: 'button',
+                className: 'dqs-iconBtn dqs-tip',
+                'data-tip': t('system.reset'),
+                'aria-label': t('system.reset'),
+                'data-hidden': overrides[row.id] === undefined ? 'true' : 'false',
+                onClick: async () => {
+                  markResult(row.id, await applyEdit({ type: 'reset', id: row.id }));
+                }
+              }, h(ResetIcon)),
               h(KeyRecorder, {
                 ctx,
                 t,
@@ -1927,15 +1962,6 @@ window.__ModuleLoader__.load({
                   markResult(row.id, await applyEdit({ type: 'set', id: row.id, binding }));
                 }
               }),
-              overrides[row.id] !== undefined
-                ? h('button', {
-                  type: 'button',
-                  className: 'dqs-linkBtn',
-                  onClick: async () => {
-                    markResult(row.id, await applyEdit({ type: 'reset', id: row.id }));
-                  }
-                }, t('system.reset'))
-                : null,
               sysIssues[row.id]
                 ? h('span', { className: 'dqs-editorError' }, sysIssues[row.id])
                 : null);
@@ -2280,12 +2306,14 @@ window.__ModuleLoader__.load({
 
         ctx.effect(() => {
           if (typeof document === 'undefined') return undefined;
-          if (document.querySelector('style[data-dqs="1"]')) return undefined;
-          const style = document.createElement('style');
+          // Upgrade an existing tag in place: after a hot reload the old tag is
+          // still attached, and skipping it would keep stale CSS alive.
+          const existing = document.querySelector('style[data-dqs="1"]');
+          const style = existing ?? document.createElement('style');
           style.setAttribute('data-dqs', '1');
           style.textContent = CSS;
-          document.head.appendChild(style);
-          return () => { style.remove(); };
+          if (!existing) document.head.appendChild(style);
+          return () => { if (style.isConnected) style.remove(); };
         }, 'shortcut-ext: styles');
 
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({
