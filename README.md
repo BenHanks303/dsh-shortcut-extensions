@@ -8,6 +8,8 @@ A [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) plug
 
 中文说明见 [README.zh.md](README.zh.md)。
 - **Header chips** — the current workspace name and git branch sit right beside the session title (`conversation.session.header.actions`); the branch is re-read whenever you enter a session.
+- **Skill palette** (⌘⇧K) — lists installed skills from `skills/list` and inserts `/name ` at the caret without touching the rest of your draft.
+- The workspace and git-branch chips use a stable per-name hue (colored tags).
 
 ## Features
 

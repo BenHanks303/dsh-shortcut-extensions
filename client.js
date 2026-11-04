@@ -62,7 +62,18 @@ window.__ModuleLoader__.load({
       'action.showConversation': '回到对话视图',
       'action.showDeck': '打开快捷键拓展面板',
       'action.newSession': '新建会话',
-      'palette.title': '切换模型',
+      'action.openSkillPalette': '打开技能列表',
+      'skill.title': '技能列表',
+      'skill.placeholder': '搜索技能（名称或描述）',
+      'skill.loading': '技能列表加载中…',
+      'skill.empty': '没有匹配的技能',
+      'skill.userOnly': '仅用户',
+      'skill.inserted': '已插入 /{name}',
+      'skill.noSession': '没有打开的会话',
+      'skill.failed': '插入失败',
+      'skill.hint.insert': '插入',
+      'skill.hint.send': '仅插入，不发送',
+      'palette.title': '模型列表',
       'palette.placeholder': '输入以搜索模型（置顶模型排在最前）',
       'palette.loading': '模型目录加载中…',
       'palette.loadError': '模型目录加载失败',
@@ -90,7 +101,7 @@ window.__ModuleLoader__.load({
       'session.none': '未打开会话',
       'session.noneOther': '没有其它会话可切换',
       'session.noneCompleted': '暂时没有刚回答完的会话',
-      'session.paletteTitle': '切换会话',
+      'session.paletteTitle': '会话列表',
       'session.placeholder': '搜索会话（含已归档）',
       'session.badgeArchived': '已归档',
       'session.newSession': '新会话',
@@ -168,7 +179,18 @@ window.__ModuleLoader__.load({
       'action.showConversation': 'Return to the conversation view',
       'action.showDeck': 'Open the Shortcut Extensions panel',
       'action.newSession': 'Start a new session',
-      'palette.title': 'Switch model',
+      'action.openSkillPalette': 'Open skill list',
+      'skill.title': 'Skills',
+      'skill.placeholder': 'Search skills (name or description)',
+      'skill.loading': 'Loading skills…',
+      'skill.empty': 'No matching skill',
+      'skill.userOnly': 'user-only',
+      'skill.inserted': 'Inserted /{name}',
+      'skill.noSession': 'No open session',
+      'skill.failed': 'Insert failed',
+      'skill.hint.insert': 'insert',
+      'skill.hint.send': 'inserts only, never sends',
+      'palette.title': 'Model list',
       'palette.placeholder': 'Type to search models (pinned models come first)',
       'palette.loading': 'Loading model catalog…',
       'palette.loadError': 'Failed to load the model catalog',
@@ -196,7 +218,7 @@ window.__ModuleLoader__.load({
       'session.none': 'No open session',
       'session.noneOther': 'No other session to switch to',
       'session.noneCompleted': 'No session has just answered',
-      'session.paletteTitle': 'Switch session',
+      'session.paletteTitle': 'Session list',
       'session.placeholder': 'Search sessions (including archived)',
       'session.badgeArchived': 'Archived',
       'session.newSession': 'New session',
@@ -290,6 +312,12 @@ window.__ModuleLoader__.load({
         labelKey: 'action.openSessionPalette',
         impl: 'palette.open(session)',
         run: (d) => { d.sessionPaletteOpen.set(true); }
+      },
+      {
+        id: 'open-skill-palette',
+        labelKey: 'action.openSkillPalette',
+        impl: 'skills.list({ sessionId })',
+        run: (d) => { d.skillPaletteOpen.set(true); }
       },
       {
         id: 'jump-completed',
@@ -423,6 +451,25 @@ window.__ModuleLoader__.load({
         ]
       },
       {
+        id: 'shortcut-ext.skill-palette',
+        action: 'open-skill-palette',
+        attempts: [
+          {
+            'desktop:macos': { code: 'KeyK', modifiers: ['primary', 'shift'] },
+            'desktop:windows': { code: 'KeyK', modifiers: ['primary', 'shift'] },
+            'desktop:linux': { code: 'KeyK', modifiers: ['primary', 'shift'] },
+            'web:macos': { code: 'KeyK', modifiers: ['primary', 'shift'] },
+            'web:windows': { code: 'KeyK', modifiers: ['primary', 'shift'] }
+          },
+          {
+            'desktop:macos': { code: 'KeyK', modifiers: ['primary', 'alt'] },
+            'desktop:windows': { code: 'KeyK', modifiers: ['primary', 'alt'] },
+            'desktop:linux': { code: 'KeyK', modifiers: ['primary', 'alt'] }
+          },
+          {}
+        ]
+      },
+      {
         id: 'shortcut-ext.session-next',
         action: 'next-session',
         attempts: [
@@ -482,9 +529,9 @@ window.__ModuleLoader__.load({
         action: 'toggle-permission',
         attempts: [
           {
-            'desktop:macos': { code: 'KeyP', modifiers: ['primary', 'shift'] },
-            'desktop:windows': { code: 'KeyP', modifiers: ['primary', 'shift'] },
-            'desktop:linux': { code: 'KeyP', modifiers: ['primary', 'shift'] },
+            'desktop:macos': { code: 'KeyC', modifiers: ['control'] },
+            'desktop:windows': { code: 'KeyC', modifiers: ['control'] },
+            'desktop:linux': { code: 'KeyC', modifiers: ['control'] },
             'web:macos': { code: 'KeyP', modifiers: ['primary', 'shift'] },
             'web:windows': { code: 'KeyP', modifiers: ['primary', 'shift'] }
           },
@@ -561,7 +608,20 @@ window.__ModuleLoader__.load({
       '.dqs-tagProvider{color:hsl(var(--dqs-hue,210) 70% 50%);',
       'border-color:color-mix(in srgb, currentColor 45%, transparent);',
       'background:color-mix(in srgb, currentColor 12%, transparent);}',
-      '.dqs-tagReasoning{color:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);}',
+      '.dqs-skillRow{display:flex;align-items:baseline;gap:8px;padding:8px 10px;border-radius:8px;',
+      'cursor:pointer;min-height:36px;box-sizing:border-box;}',
+      '.dqs-skillName{flex:none;font-size:14px;font-weight:400;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;',
+      'color:var(--dsw-alias-label-primary);white-space:nowrap;}',
+      '.dqs-skillBadge{flex:none;font-size:10px;line-height:16px;padding:0 6px;border-radius:999px;',
+      'color:var(--dsw-alias-label-secondary);border:.5px solid var(--dsw-alias-border-l1);}',
+      '.dqs-skillDesc{flex:1 1 auto;min-width:0;font-size:12px;color:var(--dsw-alias-label-secondary);',
+      'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.dqs-skillRow[data-active="true"]{background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-2));}',
+      '.dqs-tagSuffix{border-width:1px;',
+      'color:color-mix(in srgb, var(--dsw-alias-label-primary) 88%, transparent);',
+      'border-color:color-mix(in srgb, var(--dsw-alias-label-primary) 45%, transparent);}',
+      '.dqs-tagReasoning{color:var(--dsw-alias-label-secondary);',
+      'border-color:var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));background:transparent;}',
       '.dqs-check{flex:none;color:var(--dsw-alias-brand-primary);display:flex;}',
       '.dqs-pinBtn{flex:none;border:none;background:none;cursor:pointer;padding:2px;border-radius:4px;display:flex;',
       'color:var(--dsw-alias-label-secondary);}',
@@ -580,8 +640,10 @@ window.__ModuleLoader__.load({
       '.dqs-rowDot[data-running="true"]{background:var(--dsw-alias-state-success-primary);opacity:1;}',
       '.dqs-rowPin{flex:none;color:var(--dsw-alias-brand-primary);display:flex;}',
       '.dqs-hdrChip{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 8px;',
-      'border-radius:5px;font-size:11px;line-height:1;color:var(--dsw-alias-label-secondary);',
-      'background:var(--dsw-alias-bg-layer-2);border:.5px solid var(--dsw-alias-border-l1);',
+      'border-radius:5px;font-size:11px;line-height:1;',
+      'color:hsl(var(--dqs-hue,210) 70% 46%);',
+      'border:.5px solid color-mix(in srgb, currentColor 40%, transparent);',
+      'background:color-mix(in srgb, currentColor 13%, transparent);',
       'max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-right:6px;}',
       '.dqs-hdrChip:last-child{margin-right:0;}',
       '.dqs-hdrChipLabel{overflow:hidden;text-overflow:ellipsis;}',
@@ -1387,7 +1449,7 @@ window.__ModuleLoader__.load({
           onMouseDown: (event) => event.stopPropagation()
         },
           h('div', { className: 'dqs-paletteHead' },
-            h('span', { className: 'dqs-paletteTitle' }, t('palette.title')),
+            h('span', { className: 'dqs-paletteTitle' }, `${t('palette.title')}（${rows.length}）`),
             h('button', {
               type: 'button',
               className: 'dqs-closeBtn',
@@ -1428,20 +1490,11 @@ window.__ModuleLoader__.load({
                   title: row.providerName,
                   onClick: (event) => { event.stopPropagation(); setQuery(row.providerName); setHighlight(0); }
                 }, row.providerName),
-                h('button', {
-                  type: 'button',
-                  className: 'dqs-pinBtn',
-                  'data-pinned': pinned ? 'true' : 'false',
-                  title: t('palette.pin'),
-                  'aria-label': `${t('palette.pin')}: ${row.name}`,
-                  'aria-pressed': pinned,
-                  onClick: (event) => { event.stopPropagation(); pins.toggle(row.key); }
-                }, h(StarIcon, { pinned })),
                 h('span', { className: 'dqs-rowName', title: row.description ?? undefined }, row.baseName),
                 row.suffix
                   ? h('button', {
                     type: 'button',
-                    className: 'dqs-tag',
+                    className: 'dqs-tag dqs-tagSuffix',
                     title: row.suffix,
                     onClick: (event) => { event.stopPropagation(); setQuery(row.suffix); setHighlight(0); }
                   }, row.suffix)
@@ -1453,7 +1506,16 @@ window.__ModuleLoader__.load({
                 h('span', { className: 'dqs-rowEnd' },
                   busyKey === row.key
                     ? h('span', { className: 'dqs-rowBusy' }, t('palette.switching'))
-                    : (isCurrent ? h('span', { className: 'dqs-check' }, h(CheckIcon)) : null))
+                    : (isCurrent ? h('span', { className: 'dqs-check' }, h(CheckIcon)) : null)),
+                h('button', {
+                  type: 'button',
+                  className: 'dqs-pinBtn',
+                  'data-pinned': pinned ? 'true' : 'false',
+                  title: t('palette.pin'),
+                  'aria-label': `${t('palette.pin')}: ${row.name}`,
+                  'aria-pressed': pinned,
+                  onClick: (event) => { event.stopPropagation(); pins.toggle(row.key); }
+                }, h(StarIcon, { pinned })),
               );
             })),
           status ? h('div', {
@@ -1470,6 +1532,181 @@ window.__ModuleLoader__.load({
             h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, '\u2605'), t('palette.hint.pin')),
             h('span', { className: 'dqs-hintItem' }, t('palette.hint.tag')))
         ));
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Skill palette: pick an installed skill and insert /name at the caret */
+    /* ------------------------------------------------------------------ */
+
+    function useSkills(ctx, open, sessionId) {
+      const [state, setState] = useState({ status: 'idle', items: [], error: null });
+      useEffect(() => {
+        if (!open) return undefined;
+        if (sessionId === undefined) {
+          setState({ status: 'no-session', items: [], error: null });
+          return undefined;
+        }
+        let cancelled = false;
+        const controller = new AbortController();
+        setState({ status: 'loading', items: [], error: null });
+        (async () => {
+          try {
+            const response = await ctx.remote.skills.list({ sessionId }, controller.signal);
+            if (cancelled) return;
+            if (response && response.ok === false) {
+              const detail = response.error ?? {};
+              setState({ status: 'error', items: [], error: `${detail.code ?? 'error'} ${detail.message ?? ''}`.trim() });
+              return;
+            }
+            const skills = response?.value?.skills ?? response?.skills ?? [];
+            setState({ status: 'ready', items: skills, error: null });
+          } catch (error) {
+            if (cancelled) return;
+            setState({ status: 'error', items: [], error: String(error?.message ?? error) });
+          }
+        })();
+        return () => { cancelled = true; controller.abort(); };
+      }, [ctx, open, sessionId]);
+      return state;
+    }
+
+    /** Insert `/name ` at the caret, never replacing the draft around it. */
+    function insertSkillIntoComposer(ctx, name, t, hint) {
+      const sessionId = mainSessionId(ctx);
+      if (sessionId === undefined) { hint(t('skill.noSession')); return false; }
+      try {
+        const scope = ctx.sessions.scope(sessionId);
+        if (scope === undefined) { hint(t('skill.noSession')); return false; }
+        const shell = ctx.conversation.input.for(scope);
+        const text = `/${name} `;
+        let applied = false;
+        try { applied = shell.insertText(text, shell.caretSpan()) === true; } catch { applied = false; }
+        if (!applied) {
+          const draft = typeof shell.snapshot?.draft === 'string' ? shell.snapshot.draft : '';
+          shell.setDraft(draft + text);
+        }
+        try { shell.focus(); } catch { /* noop */ }
+        hint(t('skill.inserted').replace('{name}', name));
+        return true;
+      } catch (error) {
+        hint(`${t('skill.failed')}: ${error?.message ?? error}`);
+        return false;
+      }
+    }
+
+    function SkillPaletteLayer(props) {
+      const open = useStore(props.openStore);
+      if (!open) return null;
+      return h(SkillPaletteInner, props);
+    }
+
+    function SkillPaletteInner({ ctx, t, openStore, hint }) {
+      useLocaleTick(ctx);
+      const sessionId = useSessionId(ctx);
+      const { status, items, error } = useSkills(ctx, true, sessionId);
+      const [query, setQuery] = useState('');
+      const [highlight, setHighlight] = useState(0);
+      const inputRef = useRef(null);
+      const rowRefs = useRef([]);
+
+      useEffect(() => {
+        const id = setTimeout(() => { try { inputRef.current?.focus(); } catch { /* noop */ } }, 0);
+        return () => clearTimeout(id);
+      }, []);
+
+      const rows = useMemo(() => {
+        const needle = query.trim().toLowerCase();
+        const source = items.filter((item) => item.name && item.name !== '');
+        if (needle === '') return source;
+        return source.filter((item) => `${item.name} ${item.description ?? ''}`.toLowerCase().includes(needle));
+      }, [items, query]);
+
+      useEffect(() => { setHighlight(0); }, [query]);
+      useEffect(() => { setHighlight((prev) => Math.min(prev, Math.max(0, rows.length - 1))); }, [rows.length]);
+      useEffect(() => {
+        try { rowRefs.current[highlight]?.scrollIntoView({ block: 'nearest' }); } catch { /* noop */ }
+      }, [highlight, rows.length]);
+
+      const pick = (row) => {
+        if (!row) return;
+        if (insertSkillIntoComposer(ctx, row.name, t, hint)) openStore.set(false);
+      };
+
+      const onKeyDown = (event) => {
+        if (event.isComposing || event.keyCode === 229) return;
+        if (event.key === 'ArrowDown') { event.preventDefault(); setHighlight((prev) => Math.min(prev + 1, rows.length - 1)); return; }
+        if (event.key === 'ArrowUp') { event.preventDefault(); setHighlight((prev) => Math.max(prev - 1, 0)); return; }
+        if (event.key === 'Enter') { event.preventDefault(); pick(rows[highlight]); return; }
+        if (event.key === 'Escape') { event.preventDefault(); openStore.set(false); }
+      };
+
+      useEffect(() => {
+        const onDocKey = (event) => {
+          if (event.isComposing || event.keyCode === 229) return;
+          if (event.key === 'Escape') { event.preventDefault(); openStore.set(false); }
+        };
+        document.addEventListener('keydown', onDocKey, true);
+        return () => document.removeEventListener('keydown', onDocKey, true);
+      }, [openStore]);
+
+      return h('div', {
+        className: 'dqs-backdrop',
+        onMouseDown: () => openStore.set(false)
+      },
+        h('div', {
+          className: 'dqs-palette',
+          role: 'dialog',
+          'aria-label': t('skill.title'),
+          onMouseDown: (event) => event.stopPropagation()
+        },
+          h('div', { className: 'dqs-paletteHead' },
+            h('span', { className: 'dqs-paletteTitle' }, `${t('skill.title')}（${rows.length}）`),
+            h('button', {
+              type: 'button',
+              className: 'dqs-closeBtn',
+              'aria-label': t('palette.hint.close'),
+              onClick: () => openStore.set(false)
+            }, '\u2715')),
+          h('div', { className: 'dqs-searchWrap' },
+            h('span', { className: 'dqs-searchIcon' }, h(SearchIcon)),
+            h('input', {
+              className: 'dqs-input',
+              ref: inputRef,
+              value: query,
+              placeholder: t('skill.placeholder'),
+              'aria-label': t('skill.title'),
+              autoComplete: 'off',
+              spellCheck: false,
+              onChange: (event) => setQuery(event.target.value),
+              onKeyDown
+            })),
+          h('div', { className: 'dqs-list', role: 'listbox', 'aria-label': t('skill.title') },
+            rows.map((row, index) => h('div', {
+              key: row.name,
+              ref: (el) => { rowRefs.current[index] = el; },
+              className: 'dqs-skillRow',
+              role: 'option',
+              'aria-selected': index === highlight,
+              'data-active': index === highlight ? 'true' : 'false',
+              onMouseEnter: () => setHighlight(index),
+              onClick: () => pick(row)
+            },
+              h('span', { className: 'dqs-skillName' }, `/${row.name}`),
+              row.modelInvocable === false
+                ? h('span', { className: 'dqs-skillBadge' }, t('skill.userOnly'))
+                : null,
+              h('span', { className: 'dqs-skillDesc', title: row.description ?? undefined },
+                row.description ?? (row.whenToUse ?? ''))))),
+          status === 'loading' ? h('div', { className: 'dqs-status' }, t('skill.loading')) : null,
+          status === 'no-session' ? h('div', { className: 'dqs-status' }, t('skill.noSession')) : null,
+          status === 'ready' && rows.length === 0 ? h('div', { className: 'dqs-status' }, t('skill.empty')) : null,
+          error ? h('div', { className: 'dqs-status dqs-statusError' }, error) : null,
+          h('div', { className: 'dqs-footer' },
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, '\u2191\u2193'), t('palette.hint.nav')),
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, 'Enter'), t('skill.hint.insert')),
+            h('span', { className: 'dqs-hintItem' }, h('span', { className: 'dqs-kbd' }, 'Esc'), t('palette.hint.close')),
+            h('span', { className: 'dqs-hintItem' }, t('skill.hint.send'))))
+      );
     }
 
     /* ------------------------------------------------------------------ */
@@ -1607,7 +1844,7 @@ window.__ModuleLoader__.load({
           onMouseDown: (event) => event.stopPropagation()
         },
           h('div', { className: 'dqs-paletteHead' },
-            h('span', { className: 'dqs-paletteTitle' }, t('session.paletteTitle')),
+            h('span', { className: 'dqs-paletteTitle' }, `${t('session.paletteTitle')}（${rows.length}）`),
             h('button', {
               type: 'button',
               className: 'dqs-closeBtn',
@@ -1702,6 +1939,13 @@ window.__ModuleLoader__.load({
     const FOLDER_GLYPH = '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />';
     const BRANCH_GLYPH = '<line x1="6" x2="6" y1="3" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" />';
 
+    function hueOf(text) {
+      const value = String(text ?? '');
+      let hash = 0;
+      for (let i = 0; i < value.length; i += 1) hash = (hash * 31 + value.charCodeAt(i)) % 360;
+      return hash;
+    }
+
     function basenameOf(path) {
       return String(path ?? '').split('/').filter(Boolean).pop() ?? '';
     }
@@ -1735,7 +1979,11 @@ window.__ModuleLoader__.load({
         if (name !== '') workspace = { title: name, path: cwd };
       }
       if (!workspace) return null;
-      return h('span', { className: 'dqs-hdrChip', title: workspace.path ?? workspace.title },
+      return h('span', {
+        className: 'dqs-hdrChip',
+        title: workspace.path ?? workspace.title,
+        style: { '--dqs-hue': String(hueOf(workspace.path ?? workspace.title)) }
+      },
         h('span', { className: 'dqs-hdrChipIcon' }, h(HeaderGlyph, { markup: FOLDER_GLYPH })),
         h('span', { className: 'dqs-hdrChipLabel' }, workspace.title));
     }
@@ -1790,7 +2038,11 @@ window.__ModuleLoader__.load({
         return () => { cancelled = true; };
       }, [ctx, sessionId]);
       if (state.branch) {
-        return h('span', { className: 'dqs-hdrChip', title: `git: ${state.branch}` },
+        return h('span', {
+          className: 'dqs-hdrChip',
+          title: `git: ${state.branch}`,
+          style: { '--dqs-hue': String(hueOf(`branch:${state.branch}`)) }
+        },
           h('span', { className: 'dqs-hdrChipIcon' }, h(HeaderGlyph, { markup: BRANCH_GLYPH })),
           h('span', { className: 'dqs-hdrChipLabel' }, state.branch));
       }
@@ -2400,6 +2652,7 @@ window.__ModuleLoader__.load({
         'remote',
         'remote.permissionPresets',
         'remote.workspaceFiles',
+        'remote.skills',
         'modelDirectories'
       ],
       apply(ctx) {
@@ -2407,6 +2660,7 @@ window.__ModuleLoader__.load({
         const t = ctx.locale.bind(NS);
         const paletteOpen = createStore(false);
         const sessionPaletteOpen = createStore(false);
+        const skillPaletteOpen = createStore(false);
         const pins = createPinStore();
         const enabled = createEnabledStore();
         const custom = createCustomStore();
@@ -2453,6 +2707,12 @@ window.__ModuleLoader__.load({
 
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({
           name: 'shell.overlay',
+          id: 'shortcut-ext-skills',
+          order: 42
+        }, () => h(SkillPaletteLayer, { ctx, t, openStore: skillPaletteOpen, hint })));
+
+        ctx.slots.inject('shell.overlay', () => ctx.slots.register({
+          name: 'shell.overlay',
           id: 'shortcut-ext-hint',
           order: 43
         }, () => h(HintBanner, { store: hintStore })));
@@ -2472,7 +2732,7 @@ window.__ModuleLoader__.load({
         ctx.effect(() => {
           const jumpTracker = createJumpTracker(ctx);
           const disposeCommands = installCommands(ctx, {
-            ctx, t, paletteOpen, sessionPaletteOpen, jumpTracker, hint, permCycle
+            ctx, t, paletteOpen, sessionPaletteOpen, skillPaletteOpen, jumpTracker, hint, permCycle
           }, enabled, custom);
           return () => {
             disposeCommands();

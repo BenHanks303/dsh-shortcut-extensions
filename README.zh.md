@@ -8,6 +8,8 @@
 
 English documentation: [README.md](README.md)。
 - **页头标签** — 在会话标题右侧显示当前工作区名与 git 分支（`conversation.session.header.actions`），每次进入会话都会重新读取分支。
+- **技能面板**（⌘⇧K）——从 `skills/list` 列出已安装技能，选中后把 `/name ` **插入光标处**，不覆盖你已输入或光标后的内容。
+- 工作区与 git 分支标签按名称哈希分配**稳定色相**（彩色标签）。
 
 ## 功能
 
