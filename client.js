@@ -123,7 +123,13 @@ window.__ModuleLoader__.load({
       'time.now': '刚刚',
       'time.minutes': '{n} 分钟前',
       'time.hours': '{n} 小时前',
-      'time.days': '{n} 天前'
+      'time.days': '{n} 天前',
+      'chip.copyPath': '复制路径',
+      'chip.copied': '已复制仓库路径',
+      'chip.copyFailed': '复制失败',
+      'chip.sync': '同步',
+      'chip.syncFailed': '同步失败',
+      'chip.detached': '分离 HEAD'
     };
 
     const en = {
@@ -235,7 +241,13 @@ window.__ModuleLoader__.load({
       'time.now': 'now',
       'time.minutes': '{n}m ago',
       'time.hours': '{n}h ago',
-      'time.days': '{n}d ago'
+      'time.days': '{n}d ago',
+      'chip.copyPath': 'Copy path',
+      'chip.copied': 'Repository path copied',
+      'chip.copyFailed': 'Copy failed',
+      'chip.sync': 'Sync',
+      'chip.syncFailed': 'Sync failed',
+      'chip.detached': 'Detached HEAD'
     };
 
     /* ------------------------------------------------------------------ */
@@ -635,6 +647,13 @@ window.__ModuleLoader__.load({
       '.dqs-hdrChip:last-child{margin-right:0;}',
       '.dqs-hdrChipLabel{overflow:hidden;text-overflow:ellipsis;}',
       '.dqs-hdrChipIcon{display:flex;flex:none;}',
+      /* Header chips: click to copy (repo) / click to sync (branch) */
+      '.dqs-hdrChipClick{cursor:pointer;user-select:none;transition:background .12s,border-color .12s;}',
+      '.dqs-hdrChipClick:hover{background:color-mix(in srgb,currentColor 22%,transparent);}',
+      '.dqs-hdrChipClick:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:1px;}',
+      '.dqs-hdrChipBusy{opacity:.7;cursor:progress;}',
+      '.dqs-hdrChipMarks{display:inline-flex;align-items:center;gap:3px;flex:none;font-variant-numeric:tabular-nums;}',
+      '.dqs-hdrChipMark{font-size:11px;line-height:1;letter-spacing:-.02em;}',
       '.dqs-badge{flex:none;font-size:11px;color:var(--dsw-alias-state-warn-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:999px;padding:0 8px;line-height:16px;}',
       /* Panel (mirrors the host Plugins page: centered 960px column) */
       '.dqs-page{box-sizing:border-box;height:100%;color:var(--dsw-alias-label-primary);display:flex;',
@@ -715,8 +734,11 @@ window.__ModuleLoader__.load({
       'background:var(--dsw-specific-menu,var(--dsw-alias-bg-overlay,var(--dsw-alias-bg-layer-1)));',
       'backdrop-filter:var(--dsw-menu-backdrop-filter,blur(20px));-webkit-backdrop-filter:var(--dsw-menu-backdrop-filter,blur(20px));',
       'border:.5px solid var(--dsw-alias-border-l1);',
-      'border-radius:999px;padding:8px 18px;font-size:13px;color:var(--dsw-alias-label-primary);',
-      'box-shadow:var(--dsw-elevation-prominent,0 12px 32px rgba(0,0,0,.28));pointer-events:none;}',
+      'border-radius:12px;padding:8px 18px;font-size:13px;color:var(--dsw-alias-label-primary);',
+      'box-shadow:var(--dsw-elevation-prominent,0 12px 32px rgba(0,0,0,.28));pointer-events:none;',
+      'max-width:min(640px,calc(100vw - 48px));box-sizing:border-box;',
+      'white-space:pre-wrap;word-break:break-word;line-height:1.45;',
+      'font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;}',
       /* Session palette: right-hand preview pane (always visible) */
       '.dqs-previewPane{flex:0 0 42%;border-left:.5px solid var(--dsw-alias-border-l1);',
       'display:flex;flex-direction:column;min-width:0;height:100%;}',
@@ -733,6 +755,11 @@ window.__ModuleLoader__.load({
       '.dqs-sysRow{display:flex;align-items:center;gap:12px;padding:12px 2px;',
       'border-bottom:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));}',
       '.dqs-sysLabel{flex:1 1 auto;min-width:0;font-size:14px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+      '.dqs-chipTip{position:fixed;z-index:1160;pointer-events:none;transform:translateX(-50%);',
+      'background:var(--dsw-alias-bg-overlay,var(--dsw-alias-bg-layer-1));',
+      'border:.5px solid var(--dsw-alias-border-l1);border-radius:6px;padding:3px 8px;font-size:11px;',
+      'line-height:16px;color:var(--dsw-alias-label-primary);white-space:nowrap;',
+      'box-shadow:var(--dsw-elevation-prominent,0 6px 16px rgba(0,0,0,.18));}',
       '.dqs-tip{position:relative;}',
       '.dqs-tip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;',
       'transform:translateX(-50%);background:var(--dsw-alias-bg-overlay,var(--dsw-alias-bg-layer-1));',
@@ -742,6 +769,7 @@ window.__ModuleLoader__.load({
       '.dqs-iconBtn{flex:none;border:none;background:none;cursor:pointer;display:flex;padding:4px;',
       'border-radius:6px;color:var(--dsw-alias-label-secondary);}',
       '.dqs-iconBtn:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-2));}',
+      '.dqs-iconBtn:disabled{opacity:.45;cursor:default;background:none;}',
       '.dqs-iconBtn[data-hidden="true"]{visibility:hidden;pointer-events:none;}',
       '.dqs-sysFixed{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary);',
       'border:1px solid var(--dsw-alias-border-l1);border-radius:999px;padding:1px 8px;}'
@@ -1826,6 +1854,9 @@ window.__ModuleLoader__.load({
     /* ------------------------------------------------------------------ */
     /* Conversation header chips: workspace name and git branch            */
     /* ------------------------------------------------------------------ */
+    /* Click, not hover: the repository chip copies its full path and the   */
+    /* branch chip syncs with its upstream. The branch chip also carries    */
+    /* lazygit-style divergence marks (↑ ahead / ↓ behind).                 */
 
     const FOLDER_GLYPH = '<path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" />';
     const BRANCH_GLYPH = '<line x1="6" x2="6" y1="3" y2="15" /><circle cx="18" cy="6" r="3" /><circle cx="6" cy="18" r="3" /><path d="M18 9a9 9 0 0 1-9 9" />';
@@ -1850,19 +1881,195 @@ window.__ModuleLoader__.load({
       return undefined;
     }
 
-    function HeaderGlyph({ markup }) {
+    function HeaderGlyph({ markup, size }) {
+      const edge = size ?? 12;
       return h('svg', {
-        width: 12, height: 12, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+        width: edge, height: edge, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
         strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true,
         style: { display: 'block' },
         dangerouslySetInnerHTML: { __html: markup }
       });
     }
 
-    function HeaderWorkspaceChip({ ctx }) {
+    /** Copy text to the clipboard (async Clipboard API with a legacy fallback). */
+    async function copyToClipboard(text) {
+      try {
+        if (navigator?.clipboard?.writeText) { await navigator.clipboard.writeText(text); return true; }
+      } catch { /* fall back */ }
+      try {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        const ok = document.execCommand('copy');
+        document.body.removeChild(area);
+        return ok;
+      } catch { return false; }
+    }
+
+    /** Read one workspace file as text; resolves to a { ok, text } result. */
+    async function readWorkspaceText(ctx, sessionId, path, limit) {
+      try {
+        const response = await ctx.remote.workspaceFiles.read(
+          sessionId, path, { offset: 1, limit: limit ?? 8 }, new AbortController().signal
+        );
+        if (response && response.ok === false) return { ok: false, text: '' };
+        const payload = response?.value ?? response;
+        return { ok: true, text: String(payload?.text ?? '') };
+      } catch { return { ok: false, text: '' }; }
+    }
+
+    /** The branch of the session's repository, read from `.git/HEAD`. */
+    async function readGitBranch(ctx, sessionId) {
+      const read = await readWorkspaceText(ctx, sessionId, '.git/HEAD', 8);
+      if (!read.ok) return { branch: null, detached: false };
+      const ref = /ref:\s*refs\/heads\/(.+)/u.exec(read.text);
+      if (ref) return { branch: ref[1].trim(), detached: false };
+      const trimmed = read.text.trim();
+      if (trimmed === '') return { branch: null, detached: false };
+      return { branch: trimmed.slice(0, 7), detached: true };
+    }
+
+    const GIT_ROUTE = '/shortcut-ext/git';
+
+    async function fetchHostStatus(repoPath, fetchRemote) {
+      const query = `op=status&path=${encodeURIComponent(repoPath)}${fetchRemote ? '&fetch=1' : ''}`;
+      const response = await fetch(`${GIT_ROUTE}?${query}`, {
+        headers: { accept: 'application/json' },
+        credentials: 'same-origin'
+      });
+      if (!response.ok) throw new Error(`status ${response.status}`);
+      const data = await response.json();
+      if (data && data.error) throw new Error(data.error);
+      return data;
+    }
+
+    async function postGitOp(repoPath, op) {
+      const response = await fetch(GIT_ROUTE, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ op, path: repoPath })
+      });
+      let data = null;
+      try { data = await response.json(); } catch { data = null; }
+      if (!response.ok) throw new Error(data?.error || `${op} ${response.status}`);
+      return data ?? { ok: false };
+    }
+
+    /**
+     * Sync in two steps using the plain pull/push operations, so it works on a
+     * Host that predates the combined `sync` op: fetch first, then fast-forward
+     * when behind, push when ahead. A diverged branch is reported, never merged.
+     */
+    /**
+     * Sync through plain pull/push so it works on a Host without the combined
+     * `sync` op. The message shown to the user is git's own output, not our
+     * paraphrase: push when ahead, otherwise fast-forward pull.
+     */
+    async function syncRepository(repoPath) {
+      const status = await fetchHostStatus(repoPath, true);
+      const ahead = Number(status.ahead) || 0;
+      const behind = Number(status.behind) || 0;
+      if (status.detached) return { ok: false, message: 'HEAD is detached' };
+      if (!status.upstream) return { ok: false, message: `no upstream for '${status.branch ?? ''}'` };
+      if (ahead > 0 && behind > 0) {
+        return { ok: false, message: `branch and upstream have diverged: ${ahead} ahead, ${behind} behind` };
+      }
+      if (ahead > 0) {
+        const push = await postGitOp(repoPath, 'push');
+        return { ok: push.ok === true, message: gitMessage(push, 'push') };
+      }
+      if (behind > 0) {
+        const pull = await postGitOp(repoPath, 'pull');
+        return { ok: pull.ok === true, message: gitMessage(pull, 'pull') };
+      }
+      return { ok: true, message: 'Already up to date.' };
+    }
+
+    /** git's own stdout/stderr, else a short fallback naming the operation. */
+    function gitMessage(result, op) {
+      const text = [result?.stdout, result?.stderr]
+        .map((part) => String(part ?? '').trim())
+        .filter(Boolean)
+        .join('\n');
+      if (text) return text;
+      if (result?.ok === true) return `${op}: done`;
+      return `${op} failed${result?.exitCode != null ? ` (exit ${result.exitCode})` : ''}`;
+    }
+
+    /** One shared snapshot per repository, so both chips read the same numbers. */
+    const repoStatus = {
+      byPath: new Map(),
+      listeners: new Set(),
+      inflight: new Map(),
+      get(path) { return path ? this.byPath.get(path) : undefined; },
+      subscribe(fn) { this.listeners.add(fn); return () => { this.listeners.delete(fn); }; },
+      emit() { for (const fn of [...this.listeners]) fn(); },
+      set(path, value) { this.byPath.set(path, value); this.emit(); },
+      refresh(path) {
+        if (!path) return Promise.resolve(undefined);
+        const running = this.inflight.get(path);
+        if (running) return running;
+        const task = fetchHostStatus(path, true)
+          .then((data) => { this.set(path, { ...data, at: Date.now() }); return data; })
+          .catch((error) => {
+            this.set(path, { error: String(error?.message ?? error), at: Date.now() });
+            return undefined;
+          })
+          .finally(() => { this.inflight.delete(path); });
+        this.inflight.set(path, task);
+        return task;
+      }
+    };
+
+    function useRepoStatus(ctx, repoPath) {
+      const [, tick] = useReducer((n) => n + 1, 0);
+      useEffect(() => (repoPath ? repoStatus.subscribe(tick) : undefined), [repoPath]);
+      return repoPath ? repoStatus.get(repoPath) : undefined;
+    }
+
+    /**
+     * Frame-wide chip tooltip. The header clips its own overflow, so a CSS-only
+     * tooltip (and the native `title` attribute) never shows reliably; this one
+     * renders in shell.overlay from the chip's bounding rect.
+     */
+    function createChipTip() {
+      const store = createStore(null);
+      let hideTimer = null;
+      return {
+        store,
+        show(node, text) {
+          if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
+          const rect = node?.getBoundingClientRect?.();
+          if (!rect || !text) return;
+          store.set({ left: rect.left + rect.width / 2, top: rect.bottom + 6, text });
+        },
+        hide() {
+          if (hideTimer) clearTimeout(hideTimer);
+          hideTimer = setTimeout(() => { hideTimer = null; store.set(null); }, 80);
+        },
+        dispose() { if (hideTimer) { clearTimeout(hideTimer); hideTimer = null; } store.set(null); }
+      };
+    }
+
+    function ChipTipLayer({ tip }) {
+      const state = useStore(tip.store);
+      if (!state) return null;
+      return h('div', {
+        className: 'dqs-chipTip',
+        role: 'tooltip',
+        style: { left: `${Math.round(state.left)}px`, top: `${Math.round(state.top)}px` }
+      }, state.text);
+    }
+
+    function HeaderWorkspaceChip({ ctx, t, hint, chipTip }) {
       const sessionId = useSessionId(ctx);
       const workspacesSnap = useWorkspacesList(ctx);
       const sessionsSnap = useSessionsList(ctx);
+      const nodeRef = useRef(null);
       let workspace = sessionId === undefined ? undefined : workspaceOfSession(workspacesSnap, sessionId);
       if (!workspace && sessionId !== undefined) {
         const cwd = sessionsSnap?.byId?.[sessionId]?.cwd;
@@ -1870,75 +2077,104 @@ window.__ModuleLoader__.load({
         if (name !== '') workspace = { title: name, path: cwd };
       }
       if (!workspace) return null;
+      const repoPath = workspace.path ?? '';
+      const onCopy = () => {
+        if (!repoPath) return;
+        copyToClipboard(repoPath).then((ok) => {
+          hint?.(ok ? t('chip.copied') : t('chip.copyFailed'));
+        });
+      };
       return h('span', {
-        className: 'dqs-hdrChip',
-        title: workspace.path ?? workspace.title,
+        ref: nodeRef,
+        className: 'dqs-hdrChip dqs-hdrChipClick',
+        role: 'button',
+        tabIndex: 0,
+        'aria-label': t('chip.copyPath'),
+        onMouseEnter: () => chipTip?.show(nodeRef.current, t('chip.copyPath')),
+        onMouseLeave: () => chipTip?.hide(),
+        onClick: onCopy,
+        onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onCopy(); } },
         style: { '--dqs-hue': String(hueOf(workspace.path ?? workspace.title)) }
       },
         h('span', { className: 'dqs-hdrChipIcon' }, h(HeaderGlyph, { markup: FOLDER_GLYPH })),
         h('span', { className: 'dqs-hdrChipLabel' }, workspace.title));
     }
 
-    /** sessionId -> branch name (or null when unavailable). */
-    const branchCache = new Map();
-
-    async function readGitBranch(ctx, sessionId) {
-      try {
-        const response = await ctx.remote.workspaceFiles.read(
-          sessionId, '.git/HEAD', { offset: 1 }, new AbortController().signal
-        );
-        // Remote calls resolve to a { ok, value } result envelope.
-        if (response && response.ok === false) {
-          const detail = response.error ?? {};
-          return { branch: null, error: `${detail.code ?? 'failed'} ${detail.message ?? ''}`.trim() };
-        }
-        const payload = response?.value ?? response;
-        const text = String(payload?.text ?? '');
-        const ref = /ref:\s*refs\/heads\/(.+)/u.exec(text);
-        if (ref) return { branch: ref[1].trim(), error: null };
-        const trimmed = text.trim();
-        if (trimmed === '') return { branch: null, error: 'empty .git/HEAD' };
-        return { branch: trimmed.slice(0, 7), error: null };
-      } catch (error) {
-        return { branch: null, error: String(error?.message ?? error) };
-      }
-    }
-
-    const branchErrors = new Map();
-
-    function HeaderBranchChip({ ctx }) {
+    function HeaderBranchChip({ ctx, t, hint, chipTip }) {
       const sessionId = useSessionId(ctx);
-      const [state, setState] = useState({ branch: null, error: null });
-      useEffect(() => {
-        if (sessionId === undefined) { setState({ branch: null, error: null }); return undefined; }
-        // Show the cached value immediately, then re-read so a branch switch
-        // made between visits is picked up.
-        if (branchCache.has(sessionId)) {
-          setState({ branch: branchCache.get(sessionId), error: branchErrors.get(sessionId) ?? null });
-        } else {
-          setState({ branch: null, error: null });
+      const workspacesSnap = useWorkspacesList(ctx);
+      const sessionsSnap = useSessionsList(ctx);
+      const [state, setState] = useState({ branch: null, detached: false });
+      const [busy, setBusy] = useState(false);
+      const nodeRef = useRef(null);
+      const workspace = (() => {
+        let found = sessionId === undefined ? undefined : workspaceOfSession(workspacesSnap, sessionId);
+        if (!found && sessionId !== undefined) {
+          const cwd = sessionsSnap?.byId?.[sessionId]?.cwd;
+          const name = basenameOf(cwd);
+          if (name !== '') found = { title: name, path: cwd };
         }
+        return found;
+      })();
+      const repoPath = workspace?.path ?? '';
+      const status = useRepoStatus(ctx, repoPath);
+
+      useEffect(() => {
+        if (sessionId === undefined) { setState({ branch: null, detached: false }); return undefined; }
         let cancelled = false;
-        readGitBranch(ctx, sessionId).then((value) => {
-          if (cancelled) return;
-          branchCache.set(sessionId, value.branch);
-          if (value.error) branchErrors.set(sessionId, value.error);
-          else branchErrors.delete(sessionId);
-          setState(value);
-        });
+        readGitBranch(ctx, sessionId).then((value) => { if (!cancelled) setState(value); });
         return () => { cancelled = true; };
       }, [ctx, sessionId]);
-      if (state.branch) {
-        return h('span', {
-          className: 'dqs-hdrChip',
-          title: `git: ${state.branch}`,
-          style: { '--dqs-hue': String(hueOf(`branch:${state.branch}`)) }
-        },
-          h('span', { className: 'dqs-hdrChipIcon' }, h(HeaderGlyph, { markup: BRANCH_GLYPH })),
-          h('span', { className: 'dqs-hdrChipLabel' }, state.branch));
-      }
-      // Not a git repository, unreadable, or still loading: stay silent.
-      return null;
+
+      // Refresh quietly when the branch appears or the session changes.
+      useEffect(() => {
+        if (repoPath) repoStatus.refresh(repoPath);
+      }, [repoPath]);
+
+      const branch = state.branch;
+      const ahead = Number(status?.ahead) || 0;
+      const behind = Number(status?.behind) || 0;
+      const canSync = Boolean(repoPath && branch && !state.detached);
+
+      const onSync = () => {
+        if (!repoPath) return;
+        if (busy) return;
+        setBusy(true);
+        syncRepository(repoPath)
+          .then((data) => {
+            setBusy(false);
+            // Show git's own words; nothing paraphrased.
+            hint?.(data?.message || (data?.ok ? 'ok' : t('chip.syncFailed')));
+            return repoStatus.refresh(repoPath);
+          })
+          .catch((error) => {
+            setBusy(false);
+            hint?.(String(error?.message ?? error));
+          });
+      };
+
+      if (!branch) return null;
+      const marks = [];
+      if (ahead > 0) marks.push(`↑${ahead}`);
+      if (behind > 0) marks.push(`↓${behind}`);
+      return h('span', {
+        ref: nodeRef,
+        className: `dqs-hdrChip dqs-hdrChipClick${busy ? ' dqs-hdrChipBusy' : ''}`,
+        role: 'button',
+        tabIndex: 0,
+        'aria-label': t('chip.sync'),
+        onMouseEnter: () => chipTip?.show(nodeRef.current, t('chip.sync')),
+        onMouseLeave: () => chipTip?.hide(),
+        onClick: onSync,
+        onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); onSync(); } },
+        style: { '--dqs-hue': String(hueOf(`branch:${state.detached ? 'detached' : branch}`)) }
+      },
+        h('span', { className: 'dqs-hdrChipIcon' }, h(HeaderGlyph, { markup: BRANCH_GLYPH })),
+        h('span', { className: 'dqs-hdrChipLabel' }, branch),
+        marks.length
+          ? h('span', { className: 'dqs-hdrChipMarks' },
+              marks.map((mark) => h('span', { key: mark, className: 'dqs-hdrChipMark' }, mark)))
+          : null);
     }
 
     /* ------------------------------------------------------------------ */
@@ -2471,6 +2707,8 @@ window.__ModuleLoader__.load({
         const custom = createCustomStore();
         const permOrder = createStore([...PERM_CYCLE]);
         const hintStore = createStore(null);
+        const chipTip = createChipTip();
+        ctx.effect(() => () => chipTip.dispose(), 'shortcut-ext: chip tip');
         let hintSeq = 0;
         const hint = (text) => hintStore.set({ seq: ++hintSeq, text });
 
@@ -2509,13 +2747,13 @@ window.__ModuleLoader__.load({
           name: 'conversation.session.header.actions',
           id: 'shortcut-ext.header-workspace',
           order: 10
-        }, () => h(HeaderWorkspaceChip, { ctx })));
+        }, () => h(HeaderWorkspaceChip, { ctx, t, hint, chipTip })));
 
         ctx.slots.inject('conversation.session.header.actions', () => ctx.slots.register({
           name: 'conversation.session.header.actions',
           id: 'shortcut-ext.header-branch',
           order: 11
-        }, () => h(HeaderBranchChip, { ctx })));
+        }, () => h(HeaderBranchChip, { ctx, t, hint, chipTip })));
 
         ctx.slots.inject('shell.overlay', () => ctx.slots.register({
           name: 'shell.overlay',
@@ -2540,6 +2778,12 @@ window.__ModuleLoader__.load({
           id: 'shortcut-ext-hint',
           order: 43
         }, () => h(HintBanner, { store: hintStore })));
+
+        ctx.slots.inject('shell.overlay', () => ctx.slots.register({
+          name: 'shell.overlay',
+          id: 'shortcut-ext-chiptip',
+          order: 44
+        }, () => h(ChipTipLayer, { tip: chipTip })));
 
         ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
           name: 'sidebar.panellist',

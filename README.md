@@ -8,6 +8,7 @@ A [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) plug
 
 中文说明见 [README.zh.md](README.zh.md)。
 - **Header chips** — the current workspace name and git branch sit right beside the session title (`conversation.session.header.actions`); the branch is re-read whenever you enter a session.
+- **Header chips are buttons** — click the repository chip to copy its full path; the branch chip shows lazygit-style divergence (`↑2` to push, `↓1` to pull) right after the branch name, and clicking it syncs: fetch, then fast-forward when behind, push when ahead. Diverged branches are reported, never merged automatically.
 - **Skill palette** (⌘⇧K) — lists installed skills from `skills/list` and inserts `/name ` at the caret without touching the rest of your draft.
 - The workspace and git-branch chips use a stable per-name hue (colored tags).
 
@@ -22,6 +23,8 @@ A [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) plug
 - **Sidebar control panel** — every command with live keycaps and an on/off switch; a **shortcut reference tab** listing every host command, with device-local rebind/reset; transient hint banner so no command fails silently.
 - **IME-safe** — key handling ignores IME composition state (pressing Enter to commit candidates never accidentally selects an item).
 - Theme-aware (light/dark), fixed-height palettes (no jumping while searching).
+
+Repository state comes from a small same-origin Host route that runs `git` via `ctx.subprocess`. Sync needs the desktop Host's git capability; without it the branch chip still shows the branch name, but syncing reports that git is unavailable.
 
 ## Default shortcuts (macOS desktop; Ctrl on Windows/Linux)
 
@@ -58,7 +61,7 @@ Plain JavaScript, no build step, no npm dependencies (React is provided by the h
 dsh-shortcut-extensions/
 ├── package.json        # manifest: bundle patch + dsh.client declaration
 ├── cordis.patch.yml    # loader patch: one insert row
-├── index.js            # host half (empty apply; all features use host services)
+├── index.js            # host half (same-origin git route for chip status + pull/push)
 ├── client.js           # all UI/logic (client half, registered via ModuleLoader)
 ├── locale/zh.json      # display metadata + dictionaries (zh/en)
 ├── locale/en.json

@@ -8,6 +8,7 @@
 
 English documentation: [README.md](README.md)。
 - **页头标签** — 在会话标题右侧显示当前工作区名与 git 分支（`conversation.session.header.actions`），每次进入会话都会重新读取分支。
+- **页头标签可直接点击** — 点仓库标签复制完整路径；分支标签在分支名后直接显示 lazygit 风格差异（`↑2` 待推送、`↓1` 待拉取），点击即同步：先 fetch，落后则快进拉取，领先则推送；分叉只提示、不自动合并。
 - **技能面板**（⌘⇧K）——从 `skills/list` 列出已安装技能，选中后把 `/name ` **插入光标处**，不覆盖你已输入或光标后的内容。
 - 工作区与 git 分支标签按名称哈希分配**稳定色相**（彩色标签）。
 
@@ -22,6 +23,8 @@ English documentation: [README.md](README.md)。
 - **侧栏控制面板** — 每条指令带实时键帽显示和独立开关；**快捷键速查 tab** 列出宿主全部命令，可本机改键/恢复默认；所有失败都有浮层提示，绝不静默。
 - **输入法安全** — 按键处理忽略 IME 合成态（按 Enter 上屏候选字绝不会误选条目）。
 - 跟随宿主明暗主题；弹层固定高度，搜索时不跳动。
+
+仓库状态来自一个小型同源 Host 路由，经 `ctx.subprocess` 运行 `git`。同步需要桌面端 Host 的 git 能力；不具备时分支标签仍显示分支名，但同步会提示 git 不可用。
 
 ## 默认快捷键（macOS 桌面；Windows/Linux 用 Ctrl）
 
@@ -58,7 +61,7 @@ English documentation: [README.md](README.md)。
 dsh-shortcut-extensions/
 ├── package.json        # 清单：bundle patch + dsh.client 声明
 ├── cordis.patch.yml    # Loader 补丁：一行 insert
-├── index.js            # Host 半（空 apply；全部能力使用宿主服务）
+├── index.js            # Host 半（同源 git 路由：标签状态 + 拉取/推送）
 ├── client.js           # 全部 UI/逻辑（Client 半，经 ModuleLoader 注册）
 ├── locale/zh.json      # 展示元数据 + 词典（中/英）
 ├── locale/en.json
