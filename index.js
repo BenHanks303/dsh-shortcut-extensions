@@ -74,12 +74,39 @@ function gitEnvironment() {
 }
 
 /** Run one git invocation in `cwd`; resolves to collected output and exit facts. */
-async function runGit(subprocess, args, cwd, timeoutMs) {
+/**
+ * One git process at a time per Host. Identical in-flight calls share their
+ * process; anything else queues behind, so polls and double clicks never stack
+ * subprocesses.
+ */
+const gitQueue = {
+  chain: Promise.resolve(),
+  inflight: new Map(),
+  enqueue(task) {
+    const run = this.chain.then(task, task);
+    this.chain = run.then(() => undefined, () => undefined);
+    return run;
+  }
+};
+
+/** Run one git invocation in `cwd`; resolves to collected output and exit facts. */
+async function runGitOnce(subprocess, args, cwd, timeoutMs) {
   const controller = new AbortController();
-  const timer = setTimeout(() => { try { controller.abort(new Error('git timeout')); } catch { /* noop */ } }, timeoutMs);
+  let handle;
+  let timedOut = false;
+  let expire;
+  const expired = new Promise((resolve) => { expire = resolve; });
+  const timer = setTimeout(() => {
+    timedOut = true;
+    try { controller.abort(new Error('git timeout')); } catch { /* noop */ }
+    // Do not wait out the provider's grace period: reap the child now.
+    try { handle?.terminate?.(); } catch { /* already gone */ }
+    // Never let a provider that keeps `done` pending hang the request.
+    expire();
+  }, timeoutMs);
   try {
     const executable = await subprocess.resolveExecutable('git', undefined, controller.signal);
-    const handle = subprocess.spawn({
+    handle = subprocess.spawn({
       argv: [executable, ...args],
       cwd,
       stdio: {
@@ -91,15 +118,31 @@ async function runGit(subprocess, args, cwd, timeoutMs) {
       signal: controller.signal,
       env: gitEnvironment()
     });
-    const outcome = await handle.done;
+    const outcome = await Promise.race([handle.done, expired.then(() => null)]) ?? { exitCode: null, signal: null };
     const stdout = handle.collected.stdout?.readFrom(0)?.text ?? '';
     const stderr = handle.collected.stderr?.readFrom(0)?.text ?? '';
+    if (timedOut) {
+      return { exitCode: null, signal: outcome.signal, stdout, stderr: stderr || 'git timed out' };
+    }
     return { exitCode: outcome.exitCode, signal: outcome.signal, stdout, stderr };
   } catch (error) {
     return { exitCode: null, signal: null, stdout: '', stderr: String(error?.message ?? error) };
   } finally {
     clearTimeout(timer);
+    // Covers the path where spawn resolved but the wait was abandoned.
+    try { handle?.terminate?.(); } catch { /* already gone */ }
   }
+}
+
+/** Run one git invocation, sharing the process of an identical in-flight call. */
+function runGit(subprocess, args, cwd, timeoutMs) {
+  const key = `${cwd}\u0000${args.join('\u0000')}`;
+  const existing = gitQueue.inflight.get(key);
+  if (existing !== undefined) return existing;
+  const promise = gitQueue.enqueue(() => runGitOnce(subprocess, args, cwd, timeoutMs))
+    .finally(() => { gitQueue.inflight.delete(key); });
+  gitQueue.inflight.set(key, promise);
+  return promise;
 }
 
 async function isValidRepository(repoPath) {
