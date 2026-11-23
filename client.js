@@ -1933,6 +1933,8 @@ window.__ModuleLoader__.load({
     }
 
     const GIT_ROUTE = '/shortcut-ext/git';
+    /** Quiet `git fetch` cadence while the page is visible. */
+    const REPO_REFRESH_MS = 120000;
 
     async function fetchHostStatus(repoPath, fetchRemote) {
       const query = `op=status&path=${encodeURIComponent(repoPath)}${fetchRemote ? '&fetch=1' : ''}`;
@@ -2126,9 +2128,24 @@ window.__ModuleLoader__.load({
         return () => { cancelled = true; };
       }, [ctx, sessionId]);
 
-      // Refresh quietly when the branch appears or the session changes.
+      // Refresh quietly when the branch appears, then every REPO_REFRESH_MS
+      // while the page is visible; returning to the window refreshes at once.
       useEffect(() => {
-        if (repoPath) repoStatus.refresh(repoPath);
+        if (!repoPath) return undefined;
+        let cancelled = false;
+        const visible = () => typeof document === 'undefined' || document.visibilityState !== 'hidden';
+        const tick = () => { if (!cancelled && visible()) repoStatus.refresh(repoPath); };
+        tick();
+        const timer = setInterval(tick, REPO_REFRESH_MS);
+        const onShow = () => tick();
+        if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onShow);
+        if (typeof window !== 'undefined') window.addEventListener('focus', onShow);
+        return () => {
+          cancelled = true;
+          clearInterval(timer);
+          if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onShow);
+          if (typeof window !== 'undefined') window.removeEventListener('focus', onShow);
+        };
       }, [repoPath]);
 
       const branch = state.branch;

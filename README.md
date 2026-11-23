@@ -24,7 +24,7 @@ A [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) plug
 - **IME-safe** — key handling ignores IME composition state (pressing Enter to commit candidates never accidentally selects an item).
 - Theme-aware (light/dark), fixed-height palettes (no jumping while searching).
 
-Repository state comes from a small same-origin Host route that runs `git` via `ctx.subprocess`. Sync needs the desktop Host's git capability; without it the branch chip still shows the branch name, but syncing reports that git is unavailable.
+Repository state comes from a small same-origin Host route that runs `git` via `ctx.subprocess`. While the page is visible the branch chip re-runs a quiet `git fetch` every two minutes (and immediately when the window regains focus), so ahead/behind marks stay current. Sync needs the desktop Host's git capability; without it the branch chip still shows the branch name, but syncing reports that git is unavailable.
 
 ## Default shortcuts (macOS desktop; Ctrl on Windows/Linux)
 

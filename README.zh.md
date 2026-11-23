@@ -24,7 +24,7 @@ English documentation: [README.md](README.md)。
 - **输入法安全** — 按键处理忽略 IME 合成态（按 Enter 上屏候选字绝不会误选条目）。
 - 跟随宿主明暗主题；弹层固定高度，搜索时不跳动。
 
-仓库状态来自一个小型同源 Host 路由，经 `ctx.subprocess` 运行 `git`。同步需要桌面端 Host 的 git 能力；不具备时分支标签仍显示分支名，但同步会提示 git 不可用。
+仓库状态来自一个小型同源 Host 路由，经 `ctx.subprocess` 运行 `git`。页面可见时每两分钟静默执行一次 `git fetch`（窗口重新获得焦点时立即刷新），让领先/落后标记保持最新。同步需要桌面端 Host 的 git 能力；不具备时分支标签仍显示分支名，但同步会提示 git 不可用。
 
 ## 默认快捷键（macOS 桌面；Windows/Linux 用 Ctrl）
 
