@@ -119,12 +119,7 @@ window.__ModuleLoader__.load({
       'session.previewLoading': '预览加载中…',
       'perm.noSession': '打开一个会话后即可切换权限',
       'perm.unavailable': '当前部署未提供权限预设',
-      'perm.section': '权限循环',
-      'perm.current': '当前',
-      'perm.cycleHint': '点击档位加入或移出循环（至少两个）；切换键按此顺序循环。',
-      'perm.needTwo': '至少保留两个权限档位',
-      'perm.autoExcluded': '自动审查为会话级临时档，不参与循环。',
-      'perm.catalogLoading': '权限目录加载中…',
+      'perm.failed': '权限切换失败',
       'time.now': '刚刚',
       'time.minutes': '{n} 分钟前',
       'time.hours': '{n} 小时前',
@@ -236,12 +231,7 @@ window.__ModuleLoader__.load({
       'session.previewLoading': 'Loading preview…',
       'perm.noSession': 'Open a session to switch permissions',
       'perm.unavailable': 'This deployment offers no permission presets',
-      'perm.section': 'Permission cycle',
-      'perm.current': 'Current',
-      'perm.cycleHint': 'Click presets to include or exclude them (at least two); the toggle key cycles in this order.',
-      'perm.needTwo': 'Keep at least two permission presets',
-      'perm.autoExcluded': 'Auto review is a session-only temporary preset and never joins the cycle.',
-      'perm.catalogLoading': 'Loading permission catalog…',
+      'perm.failed': 'Permission switch failed',
       'time.now': 'now',
       'time.minutes': '{n}m ago',
       'time.hours': '{n}h ago',
@@ -261,6 +251,9 @@ window.__ModuleLoader__.load({
       { value: 'workspace-write', labelKey: 'preset.workspaceWrite' },
       { value: 'danger-full-access', labelKey: 'preset.full' }
     ];
+
+    /** Fixed permission cycle: one press advances to the next available preset. */
+    const PERM_CYCLE = PRESETS.map((preset) => preset.value);
 
     const PRESET_LABEL_KEY = {
       'read-only': 'preset.readOnly',
@@ -291,9 +284,10 @@ window.__ModuleLoader__.load({
       try { current = live.projections?.faceOf?.('permissions')?.getSnapshot()?.currentValue; }
       catch { current = undefined; }
       if (current === undefined) return d.hint(d.t('perm.unavailable'));
-      const cycle = d.permCycle.getSnapshot();
-      if (cycle.length < 2) return d.hint(d.t('perm.needTwo'));
-      const target = cycle[(cycle.indexOf(current) + 1) % cycle.length];
+      const order = d.permOrder.getSnapshot();
+      if (order.length < 2) return d.hint(d.t('perm.unavailable'));
+      const index = order.indexOf(current);
+      const target = order[index === -1 ? 0 : (index + 1) % order.length];
       switchPermission(d.ctx, target).catch((error) => {
         d.hint(`${d.t('perm.failed')}: ${error?.message ?? error}`);
       });
@@ -529,18 +523,11 @@ window.__ModuleLoader__.load({
         action: 'toggle-permission',
         attempts: [
           {
-            'desktop:macos': { code: 'KeyC', modifiers: ['control'] },
-            'desktop:windows': { code: 'KeyC', modifiers: ['control'] },
-            'desktop:linux': { code: 'KeyC', modifiers: ['control'] },
+            'desktop:macos': { code: 'KeyP', modifiers: ['primary', 'shift'] },
+            'desktop:windows': { code: 'KeyP', modifiers: ['primary', 'shift'] },
+            'desktop:linux': { code: 'KeyP', modifiers: ['primary', 'shift'] },
             'web:macos': { code: 'KeyP', modifiers: ['primary', 'shift'] },
             'web:windows': { code: 'KeyP', modifiers: ['primary', 'shift'] }
-          },
-          {
-            'desktop:macos': { code: 'KeyP', modifiers: ['primary', 'alt'] },
-            'desktop:windows': { code: 'KeyP', modifiers: ['primary', 'alt'] },
-            'desktop:linux': { code: 'KeyP', modifiers: ['primary', 'alt'] },
-            'web:macos': { code: 'KeyP', modifiers: ['primary', 'alt'] },
-            'web:windows': { code: 'KeyP', modifiers: ['primary', 'alt'] }
           },
           {}
         ]
@@ -741,23 +728,8 @@ window.__ModuleLoader__.load({
       '.dqs-previewScroll{flex:1 1 auto;overflow-y:auto;min-height:0;padding:2px 0 8px;}',
       '.dqs-previewLine{padding:2px 16px;font-size:12px;color:var(--dsw-alias-label-secondary);',
       'white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
-      /* Permission cycle card */
-      '.dqs-permCard{border:1px solid var(--dsw-alias-border-l1);border-radius:12px;',
-      'background:var(--dsw-alias-bg-layer-1);padding:16px 18px;}',
-      '.dqs-sectionHead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px;}',
-      '.dqs-sectionTitle{font-size:14px;font-weight:500;line-height:20px;}',
-      '.dqs-chips{display:flex;gap:8px;flex-wrap:wrap;}',
-      '.dqs-permChip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));',
-      'border-radius:999px;padding:5px 14px;font-size:12px;cursor:pointer;background:transparent;color:var(--dsw-alias-label-secondary);}',
-      '.dqs-permChip:hover{background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-2));}',
-      '.dqs-permChip[data-included="true"]{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary);font-weight:500;}',
       '.dqs-hint{font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:8px;line-height:1.6;}',
-      /* Expandable permission config + system shortcut rows */
-      '.dqs-expandBtn{flex:none;border:none;background:none;cursor:pointer;color:var(--dsw-alias-label-secondary);',
-      'display:flex;padding:4px;border-radius:6px;}',
-      '.dqs-expandBtn:hover{background:var(--dsw-alias-interactive-bg-hover,var(--dsw-alias-bg-layer-2));',
-      'color:var(--dsw-alias-label-primary);}',
-      '.dqs-expand{padding:2px 2px 18px 64px;}',
+      /* System shortcut rows */
       '.dqs-sysRow{display:flex;align-items:center;gap:12px;padding:12px 2px;',
       'border-bottom:.5px solid var(--dsw-alias-border-l2,var(--dsw-alias-border-l1));}',
       '.dqs-sysLabel{flex:1 1 auto;min-width:0;font-size:14px;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
@@ -1135,87 +1107,6 @@ window.__ModuleLoader__.load({
         { source: 'shortcutExtPreview' },
         (reference) => read(reference.binding.session)
       );
-    }
-
-    function usePermissionValue(ctx, sessionId) {
-      let face;
-      try {
-        face = sessionId === undefined ? undefined
-          : ctx.sessions.binding(sessionId)?.session?.projections?.faceOf?.('permissions');
-      } catch { face = undefined; }
-      return useSyncExternalStore(
-        (cb) => (face && typeof face.subscribe === 'function') ? face.subscribe(cb) : () => {},
-        () => { try { return face ? face.getSnapshot() : undefined; } catch { return undefined; } }
-      );
-    }
-
-    function usePermissionCatalog(ctx) {
-      const store = useMemo(() => createStore({ status: 'idle', options: [], error: null }), [ctx]);
-      useEffect(() => {
-        let disposed = false;
-        const load = () => {
-          const ns = ctx.remote?.permissionPresets;
-          if (!ns || typeof ns.catalog !== 'function') {
-            store.set({ status: 'unavailable', options: [], error: null });
-            return;
-          }
-          store.set({ ...store.getSnapshot(), status: 'loading' });
-          ns.catalog().then((result) => {
-            if (disposed) return;
-            if (!result?.ok) throw new Error(`${result?.error?.code ?? 'error'}: ${result?.error?.message ?? ''}`);
-            store.set({ status: 'ready', options: result.value?.options ?? [], error: null });
-          }).catch((error) => {
-            if (!disposed) store.set({ status: 'error', options: [], error: error?.message ?? String(error) });
-          });
-        };
-        load();
-        let off;
-        try { off = ctx.remote?.$on?.('permission-presets/catalog-changed', load); } catch { off = undefined; }
-        return () => { disposed = true; if (typeof off === 'function') off(); };
-      }, [ctx, store]);
-      return useStore(store);
-    }
-
-    const PERM_CYCLE_KEY = 'dsh.shortcut-ext.perm-cycle.v1';
-    const CANONICAL_PRESETS = ['read-only', 'workspace-write', 'danger-full-access'];
-
-    function presetOrder(value) {
-      const index = CANONICAL_PRESETS.indexOf(value);
-      return index === -1 ? 99 : index;
-    }
-
-    function readPermCycle() {
-      try {
-        const parsed = JSON.parse(localStorage.getItem(PERM_CYCLE_KEY));
-        if (Array.isArray(parsed)) {
-          const clean = [...new Set(parsed.filter((v) => typeof v === 'string' && v !== 'auto' && v !== 'custom'))];
-          if (clean.length >= 2) return clean.sort((a, b) => presetOrder(a) - presetOrder(b));
-        }
-      } catch { /* fall through to default */ }
-      return ['read-only', 'danger-full-access'];
-    }
-
-    function createPermCycleStore() {
-      const base = createStore(readPermCycle());
-      const persist = () => {
-        try { localStorage.setItem(PERM_CYCLE_KEY, JSON.stringify(base.getSnapshot())); } catch { /* private mode */ }
-      };
-      return {
-        getSnapshot: base.getSnapshot,
-        subscribe: base.subscribe,
-        /** @returns false when the removal would leave fewer than two presets */
-        toggle(value) {
-          const list = base.getSnapshot();
-          if (list.includes(value)) {
-            if (list.length <= 2) return false;
-            base.set(list.filter((v) => v !== value));
-          } else {
-            base.set([...list, value].sort((a, b) => presetOrder(a) - presetOrder(b)));
-          }
-          persist();
-          return true;
-        }
-      };
     }
 
     /* ------------------------------------------------------------------ */
@@ -2104,16 +1995,6 @@ window.__ModuleLoader__.load({
         h('path', { d: 'M10.4 10.4 14 14', stroke: 'currentColor', strokeWidth: 1.5, strokeLinecap: 'round' }));
     }
 
-    function ChevronIcon({ open }) {
-      return h('svg', {
-        width: 12, height: 12, viewBox: '0 0 16 16', 'aria-hidden': true,
-        style: { display: 'block', transform: open ? 'rotate(180deg)' : undefined, transition: 'transform .15s' }
-      }, h('path', {
-        d: 'M3 5.5 8 10.5 13 5.5', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6,
-        strokeLinecap: 'round', strokeLinejoin: 'round'
-      }));
-    }
-
     const RECORDER_ISSUE_KEY = {
       'modifier-required': 'custom.modifierRequired'
     };
@@ -2223,40 +2104,6 @@ window.__ModuleLoader__.load({
           }, t('custom.cancel'))));
     }
 
-    function PermExpand(props) {
-      const { t, catalog, catalogOptions, cycle, permCurrent, permIssue, permLabel, permCycle, setPermIssue } = props;
-      return h('div', { className: 'dqs-expand' },
-        catalogOptions.length === 0
-          ? h('div', { className: 'dqs-hint', style: { marginTop: 0 } },
-            catalog.status === 'unavailable' || catalog.status === 'error'
-              ? t('perm.unavailable')
-              : t('perm.catalogLoading'))
-          : h('div', { className: 'dqs-chips' },
-            catalogOptions.map((option) => {
-              return h('button', {
-                key: option.value,
-                type: 'button',
-                className: 'dqs-permChip',
-                'data-included': cycle.includes(option.value) ? 'true' : 'false',
-                'aria-pressed': cycle.includes(option.value) ? 'true' : 'false',
-                title: option.description ?? undefined,
-                onClick: () => {
-                  const ok = permCycle.toggle(option.value);
-                  setPermIssue(ok ? null : t('perm.needTwo'));
-                }
-              }, permLabel(option.value, option.name));
-            })),
-        h('div', { className: 'dqs-hint' }, cycle.map((value) => permLabel(value)).join(' \u2192 ')),
-        permCurrent
-          ? h('div', { className: 'dqs-hint' }, `${t('perm.current')}\uFF1A${permLabel(permCurrent)}`)
-          : null,
-        permIssue
-          ? h('div', { className: 'dqs-hint', style: { color: 'var(--dsw-alias-state-error-primary)' } }, permIssue)
-          : null,
-        h('div', { className: 'dqs-hint' }, t('perm.cycleHint')),
-        h('div', { className: 'dqs-hint' }, t('perm.autoExcluded')));
-    }
-
     /** Host shortcut catalog with device-local rebind/reset through ctx.shortcuts.edit. */
     function SystemTab({ ctx, t, query }) {
       const shortcutRows = useShortcutRows(ctx);
@@ -2340,30 +2187,13 @@ window.__ModuleLoader__.load({
         h('div', { className: 'dqs-hint' }, t('system.hint')));
     }
 
-    function CommandDeckPanel({ ctx, t, enabled, custom, permCycle }) {
+    function CommandDeckPanel({ ctx, t, enabled, custom }) {
       useLocaleTick(ctx);
       const shortcutRows = useShortcutRows(ctx);
       useStore(enabled);
       const customList = useStore(custom);
-      const cycle = useStore(permCycle);
-      const sessionId = useSessionId(ctx);
-      const permCurrent = usePermissionValue(ctx, sessionId)?.currentValue;
-      const catalog = usePermissionCatalog(ctx);
-      const [permIssue, setPermIssue] = useState(null);
       const [query, setQuery] = useState('');
-      const [expandedId, setExpandedId] = useState(null);
       const [tab, setTab] = useState('commands');
-
-      const catalogOptions = useMemo(() => {
-        const options = (catalog.options ?? [])
-          .filter((option) => option.value !== 'auto' && option.value !== 'custom');
-        return [...options].sort((a, b) => presetOrder(a.value) - presetOrder(b.value));
-      }, [catalog]);
-      const permLabel = (value, hostName) => {
-        const key = PRESET_LABEL_KEY[value];
-        if (key) return t(key);
-        return hostName ?? String(value);
-      };
 
       const entries = useMemo(() => commandEntries(customList), [customList]);
       const rowOf = (id) => (shortcutRows ?? []).find((candidate) => candidate.id === id);
@@ -2413,8 +2243,6 @@ window.__ModuleLoader__.load({
                   const row = rowOf(entry.id);
                   const on = enabled.isEnabled(entry.id);
                   const label = row?.label ?? labelOf(entry);
-                  const expandable = entry.action.id === 'toggle-permission';
-                  const expanded = expandedId === entry.id;
                   return h(React.Fragment, { key: entry.id },
                     h('div', { className: 'dqs-cmdRow', 'data-enabled': on ? 'true' : 'false' },
                       h('span', { className: 'dqs-tile' }, h(CommandGlyph, { id: entry.action.id })),
@@ -2423,16 +2251,6 @@ window.__ModuleLoader__.load({
                         h('div', { className: 'dqs-cmdImpl' }, entry.action.impl)),
                       h('div', { className: 'dqs-cmdRight' },
                         on ? h(KeyCaps, { row, t }) : h('span', { className: 'dqs-keycapNone' }, t('panel.disabled')),
-                        expandable
-                          ? h('button', {
-                            type: 'button',
-                            className: 'dqs-expandBtn',
-                            'aria-expanded': expanded ? 'true' : 'false',
-                            title: t('perm.section'),
-                            'aria-label': t('perm.section'),
-                            onClick: () => setExpandedId(expanded ? null : entry.id)
-                          }, h(ChevronIcon, { open: expanded }))
-                          : null,
                         entry.custom
                           ? h('button', {
                             type: 'button',
@@ -2449,20 +2267,7 @@ window.__ModuleLoader__.load({
                           'aria-checked': on ? 'true' : 'false',
                           'aria-label': `${on ? t('panel.enabled') : t('panel.disabled')}: ${label}`,
                           onClick: () => enabled.toggle(entry.id)
-                        }))),
-                    expanded
-                      ? h(PermExpand, {
-                        t,
-                        catalog,
-                        catalogOptions,
-                        cycle,
-                        permCurrent,
-                        permIssue,
-                        permLabel,
-                        permCycle,
-                        setPermIssue
-                      })
-                      : null);
+                        }))));
                 })))
           : h(SystemTab, { ctx, t, query }));
     }
@@ -2664,10 +2469,29 @@ window.__ModuleLoader__.load({
         const pins = createPinStore();
         const enabled = createEnabledStore();
         const custom = createCustomStore();
-        const permCycle = createPermCycleStore();
+        const permOrder = createStore([...PERM_CYCLE]);
         const hintStore = createStore(null);
         let hintSeq = 0;
         const hint = (text) => hintStore.set({ seq: ++hintSeq, text });
+
+        // Keep the fixed cycle limited to the presets this deployment offers.
+        ctx.effect(() => {
+          let disposed = false;
+          const load = () => {
+            const ns = ctx.remote?.permissionPresets;
+            if (!ns || typeof ns.catalog !== 'function') return;
+            ns.catalog().then((result) => {
+              if (disposed || !result?.ok) return;
+              const available = new Set((result.value?.defaultOptions ?? []).map((option) => option.value));
+              const next = PERM_CYCLE.filter((value) => available.has(value));
+              permOrder.set(next.length >= 2 ? next : [...PERM_CYCLE]);
+            }).catch(() => { /* keep the fixed cycle */ });
+          };
+          load();
+          let off;
+          try { off = ctx.remote?.$on?.('permission-presets/catalog-changed', load); } catch { off = undefined; }
+          return () => { disposed = true; if (typeof off === 'function') off(); };
+        }, 'shortcut-ext: permission order');
 
         ctx.effect(() => {
           if (typeof document === 'undefined') return undefined;
@@ -2727,12 +2551,12 @@ window.__ModuleLoader__.load({
         ctx.slots.inject('main', () => ctx.slots.register({
           name: 'main',
           key: PANEL_ID
-        }, () => h(CommandDeckPanel, { ctx, t, enabled, custom, permCycle })));
+        }, () => h(CommandDeckPanel, { ctx, t, enabled, custom })));
 
         ctx.effect(() => {
           const jumpTracker = createJumpTracker(ctx);
           const disposeCommands = installCommands(ctx, {
-            ctx, t, paletteOpen, sessionPaletteOpen, skillPaletteOpen, jumpTracker, hint, permCycle
+            ctx, t, paletteOpen, sessionPaletteOpen, skillPaletteOpen, jumpTracker, hint, permOrder
           }, enabled, custom);
           return () => {
             disposeCommands();

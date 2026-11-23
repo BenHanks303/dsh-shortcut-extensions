@@ -4,7 +4,7 @@
 [![Release](https://img.shields.io/github/v/tag/BenHanks303/dsh-shortcut-extensions?label=release&color=3559e0)](https://github.com/BenHanks303/dsh-shortcut-extensions/releases)
 [![Platform](https://img.shields.io/badge/platform-DSH_桌面_%7C_网页-3559e0)](https://github.com/deepseek-ai/deepseek-harness)
 
-一个 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件，为 DSH 网页/桌面界面增加一层**键盘驱动的快速切换**：模型面板、带提问预览的会话面板、会话循环、查找下一个已回答会话、聚焦输入框、可配置的权限循环——全部可以在侧栏控制面板里管理。
+一个 [DeepSeek Harness (DSH)](https://github.com/deepseek-ai/deepseek-harness) 插件，为 DSH 网页/桌面界面增加一层**键盘驱动的快速切换**：模型面板、带提问预览的会话面板、会话循环、查找下一个已回答会话、聚焦输入框、三档权限循环——全部可以在侧栏控制面板里管理。
 
 English documentation: [README.md](README.md)。
 - **页头标签** — 在会话标题右侧显示当前工作区名与 git 分支（`conversation.session.header.actions`），每次进入会话都会重新读取分支。
@@ -18,7 +18,7 @@ English documentation: [README.md](README.md)。
 - **会话循环**（`Ctrl+Tab` / `Ctrl+Shift+Tab`，桌面端）— 按侧栏活动时间顺序循环切换。
 - **查找下一个已回答的会话**（`Cmd/Ctrl+G`，网页端 `Cmd/Ctrl+Shift+G`）— 跳到最近回答完、你还没看过的会话；没有则跳到正在回答的会话。
 - **聚焦输入框**（`Cmd/Ctrl+I`）— 通过宿主 composer 门面恢复光标位置。
-- **权限循环**（`Cmd/Ctrl+Shift+P`）— 在你配置的预设档位间循环（仅可查看 / 工作区内修改 / 完全权限中任选 2 个以上，支持部署自定义预设），面板内展开配置。
+- **权限循环**（`Cmd/Ctrl+Shift+P`）— 固定顺序循环：仅可查看 → 工作区内修改 → 完全权限，按一次切一档；完全权限会把 approval 设为 `never`。
 - **侧栏控制面板** — 每条指令带实时键帽显示和独立开关；**快捷键速查 tab** 列出宿主全部命令，可本机改键/恢复默认；所有失败都有浮层提示，绝不静默。
 - **输入法安全** — 按键处理忽略 IME 合成态（按 Enter 上屏候选字绝不会误选条目）。
 - 跟随宿主明暗主题；弹层固定高度，搜索时不跳动。
@@ -42,7 +42,7 @@ English documentation: [README.md](README.md)。
 2. 在 DSH 中打开 **插件** 页面，从克隆的目录安装本插件。
 3. 重载窗口（Cmd+R）。
 
-需要标准 DSH web 组合。可选的宿主能力会优雅降级：没有权限预设时相关界面自动隐藏；没有会话大纲投影时提问预览显示提示。
+需要包含权限预设插件的标准 DSH web 组合。没有会话大纲投影时提问预览显示提示。
 
 ## 说明与限制
 
