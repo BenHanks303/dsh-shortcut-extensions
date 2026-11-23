@@ -14,15 +14,15 @@
 - `icon.svg`、`assets/`：图标 / 市场素材。
 - `package.json`：manifest；`files` 是 npm 打包**白名单**，新增运行文件必须加进去。
 
-## 本地检查（没有测试框架）
+## 本地检查（零依赖）
 
 ```bash
-node --check client.js
-node -e "for (const f of ['package.json','locale/zh.json','locale/en.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('json ok')"
+npm run check   # scripts/check.mjs：client.js 语法、JSON、zh/en key 对齐、manifest files、模块工厂冒烟
 ```
 
-- 改了 `client.js` 里 `t('...')` 的 key，确认 `zh` / `en` 两套词典都补上。
-- 不要引入构建工具或运行时依赖。
+- 也可以单独 `node --check client.js`。
+- 改了 `client.js` 里 `t('...')` 的 key，`npm run check` 会报 zh/en 缺哪个 key。
+- 不要引入构建工具或运行时依赖；`scripts/` 只在开发和 CI 用，不进 npm 发布包（`files` 白名单不含它）。
 - 本机调试：profile 是 `link:` 到这个目录，改完 `client.js` 后在 DSH 里 **Reload Window**（Cmd+R）即可；没有 dev server 热更新。
 
 ## 发布流程（重要）

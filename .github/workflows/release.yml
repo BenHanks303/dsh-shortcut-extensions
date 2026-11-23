@@ -35,6 +35,9 @@ jobs:
       - name: Use an npm that supports trusted publishing
         run: npm install -g npm@11
 
+      - name: Check
+        run: npm run check
+
       - name: Verify tag matches package.json version
         if: startsWith(github.ref, 'refs/tags/v')
         run: |

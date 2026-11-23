@@ -2,6 +2,9 @@
   "name": "dsh-shortcut-extensions",
   "version": "1.3.1",
   "type": "module",
+  "scripts": {
+    "check": "node scripts/check.mjs"
+  },
   "description": "Shortcut Extensions: a toggleable registry of quick-switch shortcut commands (model palette with pins, session palette with prompt preview and archived restore, recency-ordered session cycling, find-next-answered jump, focus composer, fixed three-step permission cycling) with a sidebar control panel and a custom command editor.",
   "keywords": [
     "dsh-plugin",
